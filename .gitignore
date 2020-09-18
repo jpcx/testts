@@ -2,4 +2,3 @@ node_modules
 .build
 .build_test
 test/dist
-demo
