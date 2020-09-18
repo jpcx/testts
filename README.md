@@ -1,4 +1,4 @@
-# testts 0.1.0 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.0/CHANGELOG.md)
+# testts 0.1.1 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.1/CHANGELOG.md)
 
 ```
     _                                 _
@@ -65,8 +65,8 @@ Node.js >=10.0.0
 
 ### Development
 
-TypeScript >=3.6
-@types/node >=10.17.35
+TypeScript >=3.6  
+@types/node >=10.17.35  
 rimraf 3.\*
 
 A helper Makefile is also included, but is not necessary
