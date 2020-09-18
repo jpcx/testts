@@ -1,6 +1,6 @@
 {
   "name": "@jpcx/testts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "an asynchronous, nesting, composable testing framework for TypeScript [zero-dependency]",
   "license": "GPL-3.0-or-later",
   "repository": "git://github.com/jpcx/testts.git",
