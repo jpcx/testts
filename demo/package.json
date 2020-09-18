@@ -12,6 +12,6 @@
   "author": "Justin Collier",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@jpcx/testts": ">=0.1.0"
+    "@jpcx/testts": "^0.1.2"
   }
 }
