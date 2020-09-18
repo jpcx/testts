@@ -1,4 +1,4 @@
-# testts 0.1.1 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.1/CHANGELOG.md)
+# testts 0.1.2 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.2/CHANGELOG.md)
 
 ```
     _                                 _
@@ -76,7 +76,7 @@ A helper Makefile is also included, but is not necessary
 ## Examples
 
 ```shell
-npm i --save-dev testts
+npm i --save-dev @jpcx/testts
 npx testts dist/ # recursively runs tests from any nested *.test.js files
 
 # any number of files/folers may be used as arguments
