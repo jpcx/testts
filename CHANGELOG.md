@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.1.1...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.1.2...devel)
+
+## [0.1.2](https://github.com/jpcx/testts/releases/tag/0.1.2)
+
+### Fixed
+
+- Changed README npm install instructions to scoped npm name
 
 ## [0.1.1](https://github.com/jpcx/testts/releases/tag/0.1.1)
 
