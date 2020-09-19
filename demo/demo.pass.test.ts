@@ -85,7 +85,7 @@ test("test for expected throws", (test) => {
   test.throws(TypeError)("example 4", () => {
     throw new TypeError();
   });
-  test.throws(TypeError, "expected msg")("example 4", () => {
+  test.throws(TypeError, "expected msg")("example 5", () => {
     throw new TypeError("expected msg");
   });
 });

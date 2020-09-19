@@ -80,7 +80,7 @@ test("test for expected throws; fail", (test) => {
   test.throws()("example 2", () => {});
   test.throws("expected msg")("example 3", () => {});
   test.throws(TypeError)("example 4", () => {});
-  test.throws(TypeError, "expected msg")("example 4", () => {});
+  test.throws(TypeError, "expected msg")("example 5", () => {});
 });
 
 test("using test return promises; fail", async (test) => {
