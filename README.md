@@ -1,4 +1,4 @@
-# [testts 0.1.3](https://github.com/jpcx/testts/blob/0.1.3/CHANGELOG.md)
+# [testts 0.1.4](https://github.com/jpcx/testts/blob/0.1.4/CHANGELOG.md)
 
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
@@ -60,7 +60,7 @@ Node.js >=10.0.0
 
 ```
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-## This package uses GitHub packages as its package repository ##
+##      This project is distributed using GitHub Packages      ##
 #  add the following info to your ~/.npmrc or [project]/.npmrc  #
 #                                                               #
 #  echo "@jpcx:registry=https://npm.pkg.github.com/" >> .npmrc  #
