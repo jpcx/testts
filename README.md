@@ -56,13 +56,6 @@ Although promises returned by `test` statements can reject, a `process` listener
 
 Node.js >=10.0.0
 
-### Development
-
-TypeScript >=3.6  
-@types/node >=10.17.35  
-
-A helper Makefile is also included, but is not necessary
-
 <a id="examples" />
 
 ## Examples
