@@ -18,6 +18,17 @@
 
 ```
 
+![](https://img.shields.io/github/package-json/v/jpcx/testts)
+![](https://img.shields.io/github/issues/jpcx/testts)
+![](https://img.shields.io/github/forks/jpcx/testts)
+![](https://img.shields.io/github/stars/jpcx/testts)
+![](https://img.shields.io/github/license/jpcx/testts)
+![](https://img.shields.io/github/last-commit/jpcx/testts)
+![](https://img.shields.io/github/downloads/jpcx/testts/total)
+![](https://img.shields.io/librariesio/github/jpcx/testts)
+![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript?label=%5Bdev%5D%20typescript)
+![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node?label=[dev]%20@types/node)
+
 ## About
 
 testts is an asynchronous, nesting, composable testing framework for TypeScript.

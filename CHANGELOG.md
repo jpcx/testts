@@ -7,6 +7,7 @@
 ### Added
 
 - Added scoped GitHub packages repository instructions
+- Added badges
 
 ### Removed
 
