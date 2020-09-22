@@ -8,6 +8,7 @@
 
 - Added scoped GitHub packages repository instructions
 - Added badges
+- Added logo
 
 ### Removed
 

@@ -10,23 +10,7 @@
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
 
-```
-    _                                 _
-   :p                                :p
-   :x                          _     :x
- .oxoxoxp          .:oxo      :p   :oxoxoxp .:oxo
-:xoxoxox  .ox     .x  oxo p   :x  :xoxoxox .x  oxo p
-   :d   .x oxo    :o,  `xo` .oxoxoxp :d    :o,  `xo`
-   :x  .o   xox  :xox      :xoxoxox  :x   :xox
-   :o  :x    oxo   :ox        :d     :o     :ox
-   :x  :oxoxoxo      :xo      :x     :x       :xo
-   :o  :oxoxox         :ox    :o     :o         :ox
-   :x  :x,        .ox,  :o    :x     :x    .ox,  :o
-   :q, :ox,   .x d'xoxo x`    :o     :q,  d'xoxo x`
-   ':x  :xoxoxo`    .oxo`     :q,    ':x     .oxo`
-         :xoxo`               ':x
-
-```
+![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
 ## About
 
@@ -65,7 +49,7 @@ Although promises returned by `test` statements can reject, a `process` listener
 
 [See the usage examples for more info](#examples)
 
-![](https://github.com/jpcx/testts/blob/demo/demo/demo.gif)
+![](https://github.com/jpcx/testts/blob/assets/demo/demo.gif)
 
 ## Requirements
 
