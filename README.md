@@ -52,8 +52,6 @@ Although promises returned by `test` statements can reject, a `process` listener
 
 ## Requirements
 
-### Usage
-
 Node.js >=10.0.0
 
 <a id="examples" />
