@@ -1,6 +1,6 @@
 {
   "name": "testts-demo",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Demonstration for README image",
   "scripts": {
     "clean": "rm -f demo.pass.test.d.ts && rm -f demo.pass.test.js && rm -f demo.fail.test.d.ts && rm -f demo.fail.test.js",
@@ -12,6 +12,6 @@
   "author": "Justin Collier",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@jpcx/testts": "^0.1.2"
+    "@jpcx/testts": "*"
   }
 }
