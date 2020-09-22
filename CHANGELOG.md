@@ -16,6 +16,7 @@
 ### Changed
 
 - Modified NPM script configuration
+- Modified README format
 
 ## [0.1.2](https://github.com/jpcx/testts/releases/tag/0.1.2)
 

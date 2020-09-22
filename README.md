@@ -1,4 +1,14 @@
-# testts 0.1.3 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.3/CHANGELOG.md)
+# [testts 0.1.3](https://github.com/jpcx/testts/blob/0.1.3/CHANGELOG.md)
+
+![](https://img.shields.io/github/issues/jpcx/testts)
+![](https://img.shields.io/github/forks/jpcx/testts)
+![](https://img.shields.io/github/stars/jpcx/testts)
+![](https://img.shields.io/github/downloads/jpcx/testts/total)
+![](https://img.shields.io/github/license/jpcx/testts)
+![](https://img.shields.io/github/last-commit/jpcx/testts)  
+![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
+![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
+![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
 
 ```
     _                                 _
@@ -17,16 +27,6 @@
          :xoxo`               ':x
 
 ```
-
-![](https://img.shields.io/github/issues/jpcx/testts)
-![](https://img.shields.io/github/forks/jpcx/testts)
-![](https://img.shields.io/github/stars/jpcx/testts)
-![](https://img.shields.io/github/downloads/jpcx/testts/total)
-![](https://img.shields.io/github/license/jpcx/testts)
-![](https://img.shields.io/github/last-commit/jpcx/testts)  
-![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
-![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
-![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
 
 ## About
 
