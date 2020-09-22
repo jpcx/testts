@@ -1,6 +1,20 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.1.2...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.1.3...devel)
+
+## [0.1.3](https://github.com/jpcx/testts/releases/tag/0.1.3)
+
+### Added
+
+- Added scoped GitHub packages repository instructions
+
+### Removed
+
+- Removed rimraf dev dependency
+
+### Changed
+
+- Modified NPM script configuration
 
 ## [0.1.2](https://github.com/jpcx/testts/releases/tag/0.1.2)
 

@@ -1,4 +1,4 @@
-# testts 0.1.2 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.2/CHANGELOG.md)
+# testts 0.1.3 | [_CHANGELOG_](https://github.com/jpcx/testts/blob/0.1.3/CHANGELOG.md)
 
 ```
     _                                 _
@@ -67,13 +67,23 @@ Node.js >=10.0.0
 
 TypeScript >=3.6  
 @types/node >=10.17.35  
-rimraf 3.\*
 
 A helper Makefile is also included, but is not necessary
 
 <a id="examples" />
 
 ## Examples
+
+```
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## This package uses GitHub packages as its package repository ##
+#  add the following info to your ~/.npmrc or [project]/.npmrc  #
+#                                                               #
+#  echo "@jpcx:registry=https://npm.pkg.github.com/" >> .npmrc  #
+#                                                               #
+## You also need to be authenticated; see https://git.io/JUzdX ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+```
 
 ```shell
 npm i --save-dev @jpcx/testts

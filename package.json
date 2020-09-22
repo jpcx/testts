@@ -1,6 +1,6 @@
 {
   "name": "@jpcx/testts",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "an asynchronous, nesting, composable testing framework for TypeScript [zero-dependency]",
   "license": "GPL-3.0-or-later",
   "repository": "git://github.com/jpcx/testts.git",
@@ -23,23 +23,22 @@
   "main": "testts.js",
   "types": "testts.d.ts",
   "scripts": {
-    "clean": "rimraf testts.js testts.d.ts",
-    "clean-test": "rimraf test/dist",
-    "build-test": "tsc -p test",
-    "test": "./test/node_modules/.bin/testts test/dist",
-    "prepublishOnly": "npm run-script build",
-    "prebuild": "npm run-script clean && echo Using TypeScript && tsc --version",
     "build": "tsc --pretty && chmod a+x testts.js",
-    "watch": "npm run-script build -- --watch"
+    "build-test": "tsc -p test",
+    "build-all": "npm run-script build && npm run-script build-test",
+    "clean": "rm -f testts.js testts.d.ts",
+    "clean-test": "rm -rf test/dist",
+    "clean-all": "npm run-script clean && npm run-script clean-test",
+    "test": "./test/node_modules/.bin/testts test/dist",
+    "prepare": "npm run-script clean-all && npm run-script build-all && npm test"
   },
   "bin": {
     "testts": "./testts.js"
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": ">=10.17.35",
     "typescript": ">=3.6",
-    "rimraf": "3.*"
+    "@types/node": ">=10.17.35"
   },
   "engines": {
     "node": ">=10.0.0"
