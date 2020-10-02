@@ -297,30 +297,88 @@ test("test.throws", (test) => {
       .throws("expected error")("message non-throw fail", () => {})
       .catch(() => _FAILED_TESTS_.push(fail9));
     _EXPECTED_FAILED_TESTS_.push(fail9);
+    const fail10: Promise<any> = test
+      .throws("expected error")("unexpected message fail", () => {
+        const e = new Error("unexpected error");
+        delete e.stack;
+        throw e;
+      })
+      .catch(() => _FAILED_TESTS_.push(fail10));
+    _EXPECTED_FAILED_TESTS_.push(fail10);
 
     test.throws(TypeError)("constructor", () => {
       throw new TypeError();
     });
-    const fail10: Promise<any> = test
+    const fail11: Promise<any> = test
       .throws(TypeError)("constructor non-throw fail", () => {})
-      .catch(() => _FAILED_TESTS_.push(fail10));
-    _EXPECTED_FAILED_TESTS_.push(fail10);
+      .catch(() => _FAILED_TESTS_.push(fail11));
+    _EXPECTED_FAILED_TESTS_.push(fail11);
+    const fail12: Promise<any> = test
+      .throws(TypeError)("unexpected constructor fail", () => {
+        const e = new Error();
+        delete e.stack;
+        throw e;
+      })
+      .catch(() => _FAILED_TESTS_.push(fail12));
+    _EXPECTED_FAILED_TESTS_.push(fail12);
 
     test.throws(TypeError, "expected error")("constructor and message", () => {
       throw new TypeError("expected error");
     });
-    const fail11: Promise<any> = test
-      .throws(TypeError, "expected error")("constructor and message", () => {})
-      .catch(() => _FAILED_TESTS_.push(fail11));
-    _EXPECTED_FAILED_TESTS_.push(fail11);
+    const fail13: Promise<any> = test
+      .throws(
+        TypeError,
+        "expected error"
+      )("constructor and message; non-throw fail", () => {})
+      .catch(() => _FAILED_TESTS_.push(fail13));
+    _EXPECTED_FAILED_TESTS_.push(fail13);
+    const fail14: Promise<any> = test
+      .throws(TypeError, "expected error")(
+        "constructor and message; unexpected message fail",
+        () => {
+          const e = new TypeError("unexpected error");
+          delete e.stack;
+          throw e;
+        }
+      )
+      .catch(() => _FAILED_TESTS_.push(fail14));
+    _EXPECTED_FAILED_TESTS_.push(fail14);
+    const fail15: Promise<any> = test
+      .throws(TypeError, "expected error")(
+        "constructor and message; unexpected constructor fail",
+        () => {
+          const e = new Error("expected error");
+          delete e.stack;
+          throw e;
+        }
+      )
+      .catch(() => _FAILED_TESTS_.push(fail15));
+    _EXPECTED_FAILED_TESTS_.push(fail15);
+    const fail16: Promise<any> = test
+      .throws(TypeError, "expected error")(
+        "constructor and message; unexpected message and constructor fail",
+        () => {
+          const e = new Error("unexpected error");
+          delete e.stack;
+          throw e;
+        }
+      )
+      .catch(() => _FAILED_TESTS_.push(fail16));
+    _EXPECTED_FAILED_TESTS_.push(fail16);
 
     test.throws((e) => e === 42)("predicate", () => {
       throw 42;
     });
-    const fail12: Promise<any> = test
+    const fail17: Promise<any> = test
       .throws((e) => e === 42)("predicate non-throw fail", () => {})
-      .catch(() => _FAILED_TESTS_.push(fail12));
-    _EXPECTED_FAILED_TESTS_.push(fail12);
+      .catch(() => _FAILED_TESTS_.push(fail17));
+    _EXPECTED_FAILED_TESTS_.push(fail17);
+    const fail18: Promise<any> = test
+      .throws((e) => e === 42)("predicate invalidation fail", () => {
+        throw "predicate will return false";
+      })
+      .catch(() => _FAILED_TESTS_.push(fail18));
+    _EXPECTED_FAILED_TESTS_.push(fail18);
 
     test("nesting", (test) => {
       test.throws("level 0: no parens", (test) => {
@@ -353,34 +411,50 @@ test("test.throws", (test) => {
     test.throws("zero-parens", () => {
       throw new Error();
     });
-    const fail13: Promise<any> = test
+    const fail19: Promise<any> = test
       .throws("zero-parens non-throw fail", async () => {})
-      .catch(() => _FAILED_TESTS_.push(fail13));
-    _EXPECTED_FAILED_TESTS_.push(fail13);
+      .catch(() => _FAILED_TESTS_.push(fail19));
+    _EXPECTED_FAILED_TESTS_.push(fail19);
 
     test.throws()("zero-arg", async () => {
       throw new Error();
     });
-    const fail14: Promise<any> = test
+    const fail20: Promise<any> = test
       .throws()("zero-arg non-throw fail", async () => {})
-      .catch(() => _FAILED_TESTS_.push(fail14));
-    _EXPECTED_FAILED_TESTS_.push(fail14);
+      .catch(() => _FAILED_TESTS_.push(fail20));
+    _EXPECTED_FAILED_TESTS_.push(fail20);
 
     test.throws("expected error")("message", async () => {
       throw new Error("expected error");
     });
-    const fail15: Promise<any> = test
+    const fail21: Promise<any> = test
       .throws("expected error")("message non-throw fail", async () => {})
-      .catch(() => _FAILED_TESTS_.push(fail15));
-    _EXPECTED_FAILED_TESTS_.push(fail15);
+      .catch(() => _FAILED_TESTS_.push(fail21));
+    _EXPECTED_FAILED_TESTS_.push(fail21);
+    const fail22: Promise<any> = test
+      .throws("expected error")("unexpected message fail", async () => {
+        const e = new Error("unexpected error");
+        delete e.stack;
+        throw e;
+      })
+      .catch(() => _FAILED_TESTS_.push(fail22));
+    _EXPECTED_FAILED_TESTS_.push(fail22);
 
     test.throws(TypeError)("constructor", async () => {
       throw new TypeError();
     });
-    const fail16: Promise<any> = test
+    const fail23: Promise<any> = test
       .throws(TypeError)("constructor non-throw fail", async () => {})
-      .catch(() => _FAILED_TESTS_.push(fail16));
-    _EXPECTED_FAILED_TESTS_.push(fail16);
+      .catch(() => _FAILED_TESTS_.push(fail23));
+    _EXPECTED_FAILED_TESTS_.push(fail23);
+    const fail24: Promise<any> = test
+      .throws(TypeError)("unexpected constructor fail", async () => {
+        const e = new Error();
+        delete e.stack;
+        throw e;
+      })
+      .catch(() => _FAILED_TESTS_.push(fail24));
+    _EXPECTED_FAILED_TESTS_.push(fail24);
 
     test.throws(TypeError, "expected error")(
       "constructor and message",
@@ -388,21 +462,49 @@ test("test.throws", (test) => {
         throw new TypeError("expected error");
       }
     );
-    const fail17: Promise<any> = test
+    const fail25: Promise<any> = test
+      .throws(
+        TypeError,
+        "expected error"
+      )("constructor and message; non-throw fail", async () => {})
+      .catch(() => _FAILED_TESTS_.push(fail25));
+    _EXPECTED_FAILED_TESTS_.push(fail25);
+    const fail26: Promise<any> = test
       .throws(TypeError, "expected error")(
-        "constructor and message",
-        async () => {}
+        "constructor and message; unexpected message fail",
+        async () => {
+          const e = new TypeError("unexpected error");
+          delete e.stack;
+          throw e;
+        }
       )
-      .catch(() => _FAILED_TESTS_.push(fail17));
-    _EXPECTED_FAILED_TESTS_.push(fail17);
+      .catch(() => _FAILED_TESTS_.push(fail26));
+    _EXPECTED_FAILED_TESTS_.push(fail26);
+    const fail27: Promise<any> = test
+      .throws(TypeError, "expected error")(
+        "constructor and message; unexpected constructor fail",
+        async () => {
+          const e = new Error("expected error");
+          delete e.stack;
+          throw e;
+        }
+      )
+      .catch(() => _FAILED_TESTS_.push(fail27));
+    _EXPECTED_FAILED_TESTS_.push(fail27);
 
     test.throws((e) => e === 42)("predicate", async () => {
       throw 42;
     });
-    const fail18: Promise<any> = test
+    const fail28: Promise<any> = test
       .throws((e) => e === 42)("predicate non-throw fail", async () => {})
-      .catch(() => _FAILED_TESTS_.push(fail18));
-    _EXPECTED_FAILED_TESTS_.push(fail18);
+      .catch(() => _FAILED_TESTS_.push(fail28));
+    _EXPECTED_FAILED_TESTS_.push(fail28);
+    const fail29: Promise<any> = test
+      .throws((e) => e === 42)("predicate invalidation fail", async () => {
+        throw "predicate will return false";
+      })
+      .catch(() => _FAILED_TESTS_.push(fail29));
+    _EXPECTED_FAILED_TESTS_.push(fail29);
 
     test("nesting", async (test) => {
       test.throws("level 0: no parens", async (test) => {
@@ -434,7 +536,7 @@ test("test.throws", (test) => {
 });
 
 function allExpectedFailureTestsFailed(): boolean {
-  if (_EXPECTED_FAILED_TESTS_.length !== 20) return false;
+  if (_EXPECTED_FAILED_TESTS_.length !== 31) return false;
   if (_EXPECTED_FAILED_TESTS_.length !== _FAILED_TESTS_.length) return false;
   for (const expected of _EXPECTED_FAILED_TESTS_) {
     if (!_FAILED_TESTS_.includes(expected)) return false;
@@ -447,7 +549,7 @@ process.addListener("exit", (code) => {
     console.log(
       "\n\x1b[32mtestts test passed!\x1b[0m" +
         "\nwe exited (1) as expected, and failed the correct tests!" +
-        '\nyou should see "passed [89/120] tests" above.' +
+        '\nyou should see "passed [89/131] tests" above.' +
         "\nif not, please let me know at m@jpcx.dev"
     );
     process.exit(0);

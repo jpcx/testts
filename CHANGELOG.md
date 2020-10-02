@@ -1,6 +1,16 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.1.4...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.1.5...devel)
+
+## [0.1.5](https://github.com/jpcx/testts/releases/tag/0.1.5)
+
+### Fixed
+
+- Fixed constructor+message throw testing
+
+### Added
+
+- Added additional tests for throw testing
 
 ## [0.1.4](https://github.com/jpcx/testts/releases/tag/0.1.4)
 

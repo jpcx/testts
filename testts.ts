@@ -364,15 +364,16 @@ class Test<T> {
             expectedThrow.predicate
           ) {
             // throw was described; check the descriptor
-            if (e instanceof Error && e.message === expectedThrow.message) {
-              _passed = true;
-            } else if (
-              expectedThrow.constructedBy &&
-              e instanceof expectedThrow.constructedBy
-            ) {
-              _passed = true;
-            } else if (expectedThrow.predicate) {
+            if (expectedThrow.predicate) {
               _passed = !!expectedThrow.predicate(e);
+            } else if (expectedThrow.constructedBy && expectedThrow.message) {
+              _passed =
+                e instanceof expectedThrow.constructedBy &&
+                e.message === expectedThrow.message;
+            } else if (expectedThrow.constructedBy) {
+              _passed = e instanceof expectedThrow.constructedBy;
+            } else if (expectedThrow.message) {
+              _passed = e.message === expectedThrow.message;
             } else {
               _passed = false;
             }
