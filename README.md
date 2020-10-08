@@ -34,6 +34,14 @@ There are two test registrars, `test(descr, body)` and `test.throws(...?)?(descr
 - any test statement, if executed, will be outputted to the console
 - promises returned from test registration will resolve or reject when the test passes or fails
 
+#### Settings
+
+Settings are applied to `test` functions and are passed on to children
+
+- `test.deleteStacks(boolean = true): void`
+  - Deletes stack traces from Error instances thrown during failures.
+  - If output is congested with errors, this will improve readability.
+
 ### Notes
 
 In order to achieve nesting, test parents must provide a `test` parameter.
@@ -47,14 +55,6 @@ Although promises returned by `test` statements can reject, a `process` listener
 - Any other unhandled rejections cause a non-zero exit.
 
 [See the usage examples for more info](#examples)
-
-#### Settings
-
-Settings are applied to `test` functions and are passed on to children
-
-- `test.deleteStacks(boolean = true): void`
-  - Deletes stack traces from Error instances thrown during failures.
-  - If output is congested with errors, this will improve readability.
 
 ![](https://github.com/jpcx/testts/blob/assets/demo/demo.gif)
 
