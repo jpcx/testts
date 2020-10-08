@@ -53,19 +53,21 @@ export interface ErrorSubConstructor {
 /**
  * Registers a new test.
  *
- * @param    description - any string description to describe the test
- * @param    body        - execution body that should throw on failure
- * @property throws      - describe an expected throw
- * @return   Promise<T>  - promises any value returned by the body
+ * @param    description  - any string description to describe the test
+ * @param    body         - execution body that should throw on failure
+ * @property throws       - describe an expected throw
+ * @property deleteStacks - optionally delete stack traces; deletes Error stacks
+ * @return   Promise<T>   - promises any value returned by the body
  */
 export type API = typeof test;
 /**
  * Registers a new test.
  *
- * @param    description - any string description to describe the test
- * @param    body        - execution body that should throw on failure
- * @property throws      - describe an expected throw
- * @return   Promise<T>  - promises any value returned by the body
+ * @param    description  - any string description to describe the test
+ * @param    body         - execution body that should throw on failure
+ * @property throws       - describe an expected throw
+ * @property deleteStacks - optionally delete stack traces; deletes Error stacks
+ * @return   Promise<T>   - promises any value returned by the body
  */
 export declare const test: {
   <T>(description: string, body: TestBody<T>): Promise<T>;
@@ -76,6 +78,7 @@ export declare const test: {
     (): API;
     <T>(description: string, body: TestBody<T>): Promise<T>;
   };
+  deleteStacks(setting?: boolean): void;
 };
 
 type ThrowDescriptor = {
@@ -261,7 +264,8 @@ class Test<T> {
     body: TestBody<T>,
     dataListener: (data?: T) => void,
     errListener: (err?: any) => void,
-    expectedThrow?: ThrowDescriptor
+    expectedThrow?: ThrowDescriptor,
+    deleteStacks?: boolean
   ) {
     let _error: any | null = null;
     let _passed: boolean = false;
@@ -280,6 +284,7 @@ class Test<T> {
 
           _STDIO_MANIP_.indent += 2;
           if (_error) {
+            if (deleteStacks && _error instanceof Error) delete _error.stack;
             console.error(_error);
           }
           if (expectedThrow) {
@@ -343,7 +348,9 @@ class Test<T> {
 
     const _onceReady = new Promise(async (resolve) => {
       try {
-        const result = await body(makeAPI((v) => _children.push(v)));
+        const result = await body(
+          makeAPI((v) => _children.push(v), deleteStacks)
+        );
         if (!expectedThrow) {
           ++_N_TESTS_PASSED_;
           _passed = true;
@@ -409,7 +416,10 @@ class Test<T> {
   }
 }
 
-function makeAPI(registerChild: <T>(child: Test<T>) => void): API {
+function makeAPI(
+  registerChild: <T>(child: Test<T>) => void,
+  deleteStacks?: boolean
+): API {
   function throws(constructor: ErrorSubConstructor, message?: string): API;
   function throws(message: string): API;
   function throws(isCorrectThrow: Predicate<[ErrorSub | any]>): API;
@@ -494,13 +504,23 @@ function makeAPI(registerChild: <T>(child: Test<T>) => void): API {
           "tests with descriptions require a test body"
         );
       const execution: Promise<T> = new Promise((resolve, reject) => {
-        const t = new Test(description, body, resolve, reject, expectedThrow);
+        const t = new Test(
+          description,
+          body,
+          resolve,
+          reject,
+          expectedThrow,
+          deleteStacks
+        );
         registerChild(t);
       });
       _TEST_PROMISES_.add(execution);
       return execution;
     };
     test.throws = throws;
+    test.deleteStacks = (setting = true) => {
+      deleteStacks = setting;
+    };
     return test;
   }
   return genTestFn();

@@ -1,4 +1,4 @@
-# [testts 0.1.5](https://github.com/jpcx/testts/blob/0.1.5/CHANGELOG.md)
+# [testts 0.2.0](https://github.com/jpcx/testts/blob/0.2.0/CHANGELOG.md)
 
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
@@ -47,6 +47,14 @@ Although promises returned by `test` statements can reject, a `process` listener
 - Any other unhandled rejections cause a non-zero exit.
 
 [See the usage examples for more info](#examples)
+
+#### Settings
+
+Settings are applied to `test` functions and are passed on to children
+
+- `test.deleteStacks(boolean = true): void`
+  - Deletes stack traces from Error instances thrown during failures.
+  - If output is congested with errors, this will improve readability.
 
 ![](https://github.com/jpcx/testts/blob/assets/demo/demo.gif)
 

@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.1.5...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.2.0...devel)
+
+## [0.2.0](https://github.com/jpcx/testts/releases/tag/0.2.0)
+
+### Added
+
+- Added `test.deleteStacks(boolean = true): void` stack deletion setting
 
 ## [0.1.5](https://github.com/jpcx/testts/releases/tag/0.1.5)
 
