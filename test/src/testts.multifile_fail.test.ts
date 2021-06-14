@@ -16,24 +16,24 @@
  *                                                                            *
  *                    @link https://github.com/jpcx/testts                    *
  *                                                                            *
- *  @license GPL-3.0-or-later                                                 *
- *  @copyright (C) 2020 @author Justin Collier <m@jpcx.dev>                   *
+ *  @license LGPL-3.0-or-later                                                *
+ *  @copyright (C) 2021 @author Justin Collier <m@jpcx.dev>                   *
  *                                                                            *
  *    This program is free software: you can redistribute it and/or modify    *
- *    it under the terms of the GNU General Public License as published by    *
- *    the Free Software Foundation, either version 3 of the License, or       *
- *    (at your option) any later version.                                     *
+ *    it under the terms of the GNU Lesser General Public License as          *
+ *    published by the Free Software Foundation, either version 3 of the      *
+ *    License, or (at your option) any later version.                         *
  *                                                                            *
  *    This program is distributed in the hope that it will be useful,         *
  *    but WITHOUT ANY WARRANTY; without even the internalied warranty of      *
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
- *    GNU General Public License for more details.                            *
+ *    GNU Lesser General Public License for more details.                     *
  *                                                                            *
- *  You should have received a copy of the GNU General Public License        **
+ *  You should have received a copy of the GNU Lesser General Public License **
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.  ***
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ****/
 
-import { test } from "@jpcx/testts";
+import { test } from "testts";
 
 const otherFileFail = test("continues testing after single file failure", () => {
   const e = new Error("This is an expected failure");

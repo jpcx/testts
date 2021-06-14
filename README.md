@@ -1,4 +1,4 @@
-# [testts 0.2.0](https://github.com/jpcx/testts/blob/0.2.0/CHANGELOG.md)
+# [testts 0.3.0](https://github.com/jpcx/testts/blob/0.3.0/CHANGELOG.md)
 
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
@@ -10,6 +10,8 @@
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
 
 ![](https://github.com/jpcx/testts/blob/assets/logo.png)
+
+![](https://nodei.co/npm/node-kraken-api/)
 
 ## About
 
@@ -66,19 +68,8 @@ Node.js >=10.0.0
 
 ## Examples
 
-```
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-##      This project is distributed using GitHub Packages      ##
-#  add the following info to your ~/.npmrc or [project]/.npmrc  #
-#                                                               #
-#  echo "@jpcx:registry=https://npm.pkg.github.com/" >> .npmrc  #
-#                                                               #
-## You also need to be authenticated; see https://git.io/JUzdX ##
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-```
-
 ```shell
-npm i --save-dev @jpcx/testts
+npm i --save-dev testts
 npx testts dist/ # recursively runs tests from any nested *.test.js files
 
 # any number of files/folers may be used as arguments
@@ -90,8 +81,8 @@ npx testts dist/ # recursively runs tests from any nested *.test.js files
 ```
 
 ```typescript
-import { test } from "@jpcx/testts";
-import { assert } from "assert";
+import { test } from "testts";
+import * as assert from "assert";
 
 import { getSampleDB } from "../";
 

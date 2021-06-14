@@ -1,6 +1,13 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.2.0...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.3.0...devel)
+
+## [0.3.0](https://github.com/jpcx/testts/releases/tag/0.3.0)
+
+### Changed
+
+- Relicensed from GPL to LGPL
+- Moved repository from GitHub Packages "@jpcx/testts" to NPM "testts"
 
 ## [0.2.0](https://github.com/jpcx/testts/releases/tag/0.2.0)
 
