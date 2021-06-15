@@ -3,7 +3,6 @@
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
 ![](https://img.shields.io/github/stars/jpcx/testts)
-![](https://img.shields.io/github/downloads/jpcx/testts/total)
 ![](https://img.shields.io/github/license/jpcx/testts)  
 ![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
