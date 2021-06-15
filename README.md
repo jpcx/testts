@@ -1,16 +1,16 @@
-# [testts 0.3.0](https://github.com/jpcx/testts/blob/0.3.0/CHANGELOG.md)
+# [testts 0.3.1](https://github.com/jpcx/testts/blob/0.3.1/CHANGELOG.md)
+
+![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
 ![](https://img.shields.io/github/stars/jpcx/testts)
-![](https://img.shields.io/github/license/jpcx/testts)  
+![](https://img.shields.io/npm/dm/@jpcx/testts)
+![](https://img.shields.io/librariesio/dependents/npm/@jpcx/testts)  
+![](https://img.shields.io/github/license/jpcx/testts)
 ![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
-
-![](https://github.com/jpcx/testts/blob/assets/logo.png)
-
-![](https://nodei.co/npm/node-kraken-api/)
 
 ## About
 
