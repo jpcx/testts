@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.  ***
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ****/
 
-import { test } from "testts";
+import { test } from "@jpcx/testts";
 
 import * as assert from "assert";
 

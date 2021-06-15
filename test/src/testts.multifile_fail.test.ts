@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.  ***
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ****/
 
-import { test } from "testts";
+import { test } from "@jpcx/testts";
 
 const otherFileFail = test("continues testing after single file failure", () => {
   const e = new Error("This is an expected failure");

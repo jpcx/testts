@@ -7,7 +7,7 @@
 ### Changed
 
 - Relicensed from GPL to LGPL
-- Moved repository from GitHub Packages "@jpcx/testts" to NPM "testts"
+- Moved repository from GitHub Packages to NPM
 
 ## [0.2.0](https://github.com/jpcx/testts/releases/tag/0.2.0)
 

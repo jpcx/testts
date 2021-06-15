@@ -68,19 +68,19 @@ Node.js >=10.0.0
 ## Examples
 
 ```shell
-npm i --save-dev testts
-npx testts dist/ # recursively runs tests from any nested *.test.js files
+npm i --save-dev @jpcx/testts
+npx @jpcx/testts dist/ # recursively runs tests from any nested *.test.js files
 
 # any number of files/folers may be used as arguments
 # manually specified files do not need to conform to the *.test.js requirement
-# npx testts dist/my.compiled.test.js dist/my.other.compiled_test.js dist/other/
+# npx @jpcx/testts dist/my.compiled.test.js dist/my.other.compiled_test.js dist/other/
 
-# there is only one setting available: `npx testts -m(--match) [ECMAScript regex]`
+# there is only one setting available: `npx @jpcx/testts -m(--match) [ECMAScript regex]`
 # the default match regex is "\\.test\\.js"
 ```
 
 ```typescript
-import { test } from "testts";
+import { test } from "@jpcx/testts";
 import * as assert from "assert";
 
 import { getSampleDB } from "../";
