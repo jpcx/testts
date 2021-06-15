@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.3.1...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.3.2...devel)
+
+## [0.3.2](https://github.com/jpcx/testts/releases/tag/0.3.2)
+
+### Fixed
+
+- Fixed an issue with npx and scoped packages
 
 ## [0.3.1](https://github.com/jpcx/testts/releases/tag/0.3.1)
 

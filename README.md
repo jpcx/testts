@@ -1,4 +1,4 @@
-# [testts 0.3.1](https://github.com/jpcx/testts/blob/0.3.1/CHANGELOG.md)
+# [testts 0.3.2](https://github.com/jpcx/testts/blob/0.3.2/CHANGELOG.md)
 
 ![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
@@ -58,6 +58,8 @@ Although promises returned by `test` statements can reject, a `process` listener
 [See the usage examples for more info](#examples)
 
 ![](https://github.com/jpcx/testts/blob/assets/demo/demo.gif)
+
+_`npx @jpcx/testts [file|directory]`_
 
 ## Requirements
 
