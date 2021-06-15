@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.3.4...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.3.5...devel)
+
+## [0.3.5](https://github.com/jpcx/testts/releases/tag/0.3.5)
+
+### Added
+
+- Added NPM install badge
 
 ## [0.3.4](https://github.com/jpcx/testts/releases/tag/0.3.4)
 
