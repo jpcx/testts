@@ -1,4 +1,4 @@
-# [testts 0.3.4](https://github.com/jpcx/testts/blob/0.3.4/CHANGELOG.md)
+# [testts 0.3.5](https://github.com/jpcx/testts/blob/0.3.5/CHANGELOG.md)
 
 ![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
@@ -9,6 +9,8 @@
 ![](https://img.shields.io/librariesio/dependents/npm/@jpcx/testts)
 ![](https://img.shields.io/github/license/jpcx/testts)
 ![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
+
+[![](https://nodei.co/npm/@jpcx/testts.png?mini=true)](https://www.npmjs.com/package/@jpcx/testts)
 
 ## About
 
