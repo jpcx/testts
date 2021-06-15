@@ -17,7 +17,7 @@
  *                    @link https://github.com/jpcx/testts                    *
  *                                                                            *
  *  @license LGPL-3.0-or-later                                                *
- *  @copyright (C) 2020, 2021 @author Justin Collier <m@jpcx.dev>             *
+ *  @copyright (C) 2021 @author Justin Collier <m@jpcx.dev>                   *
  *                                                                            *
  *    This program is free software: you can redistribute it and/or modify    *
  *    it under the terms of the GNU Lesser General Public License as          *
