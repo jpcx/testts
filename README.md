@@ -5,12 +5,10 @@
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
 ![](https://img.shields.io/github/stars/jpcx/testts)
-![](https://img.shields.io/npm/dm/@jpcx/testts)
-![](https://img.shields.io/librariesio/dependents/npm/@jpcx/testts)  
+![](https://img.shields.io/npm/dm/@jpcx/testts)  
+![](https://img.shields.io/librariesio/dependents/npm/@jpcx/testts)
 ![](https://img.shields.io/github/license/jpcx/testts)
 ![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
-![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
-![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
 
 ## About
 
@@ -58,8 +56,6 @@ Although promises returned by `test` statements can reject, a `process` listener
 [See the usage examples for more info](#examples)
 
 ![](https://github.com/jpcx/testts/blob/assets/demo/demo.gif)
-
-_`npx @jpcx/testts [file|directory]`_
 
 ## Requirements
 
