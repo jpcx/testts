@@ -1,5 +1,7 @@
 # [testts 0.3.1](https://github.com/jpcx/testts/blob/0.3.1/CHANGELOG.md)
 
+![](https://github.com/jpcx/testts/blob/assets/logo.png)
+
 ![](https://img.shields.io/github/issues/jpcx/testts)
 ![](https://img.shields.io/github/forks/jpcx/testts)
 ![](https://img.shields.io/github/stars/jpcx/testts)
@@ -9,8 +11,6 @@
 ![](https://img.shields.io/librariesio/github/jpcx/testts?label=dev-dependencies)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/typescript)
 ![](https://img.shields.io/github/package-json/dependency-version/jpcx/testts/dev/@types/node)
-
-![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
 ## About
 
