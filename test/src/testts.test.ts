@@ -306,7 +306,10 @@ test("test.throws", (test) => {
       .catch(() => _FAILED_TESTS_.push(fail10));
     _EXPECTED_FAILED_TESTS_.push(fail10);
 
-    test.throws(TypeError)("constructor", () => {
+    test.throws(Error)("constructor (base)", () => {
+      throw new Error();
+    });
+    test.throws(TypeError)("constructor (derived)", () => {
       throw new TypeError();
     });
     const fail11: Promise<any> = test
@@ -322,7 +325,10 @@ test("test.throws", (test) => {
       .catch(() => _FAILED_TESTS_.push(fail12));
     _EXPECTED_FAILED_TESTS_.push(fail12);
 
-    test.throws(TypeError, "expected error")("constructor and message", () => {
+    test.throws(Error, "expected error")("constructor and message (base)", () => {
+      throw new Error("expected error");
+    });
+    test.throws(TypeError, "expected error")("constructor and message (derived)", () => {
       throw new TypeError("expected error");
     });
     const fail13: Promise<any> = test
@@ -440,7 +446,10 @@ test("test.throws", (test) => {
       .catch(() => _FAILED_TESTS_.push(fail22));
     _EXPECTED_FAILED_TESTS_.push(fail22);
 
-    test.throws(TypeError)("constructor", async () => {
+    test.throws(Error)("constructor (base)", async () => {
+      throw new Error();
+    });
+    test.throws(TypeError)("constructor (derived)", async () => {
       throw new TypeError();
     });
     const fail23: Promise<any> = test
@@ -456,8 +465,14 @@ test("test.throws", (test) => {
       .catch(() => _FAILED_TESTS_.push(fail24));
     _EXPECTED_FAILED_TESTS_.push(fail24);
 
+    test.throws(Error, "expected error")(
+      "constructor and message (base)",
+      async () => {
+        throw new Error("expected error");
+      }
+    );
     test.throws(TypeError, "expected error")(
-      "constructor and message",
+      "constructor and message (derived)",
       async () => {
         throw new TypeError("expected error");
       }
@@ -549,7 +564,7 @@ process.addListener("exit", (code) => {
     console.log(
       "\n\x1b[32mtestts test passed!\x1b[0m" +
         "\nwe exited (1) as expected, and failed the correct tests!" +
-        '\nyou should see "passed [89/131] tests" above.' +
+        '\nyou should see "passed [93/135] tests" above.' +
         "\nif not, please let me know at m@jpcx.dev"
     );
     process.exit(0);
