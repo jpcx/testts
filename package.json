@@ -1,0 +1,49 @@
+{
+  "name": "testts",
+  "version": "0.3.0",
+  "description": "an asynchronous, nesting, composable testing framework for TypeScript [zero-dependency]",
+  "license": "LGPL-3.0-or-later",
+  "repository": "git://github.com/jpcx/testts.git",
+  "author": {
+    "name": "Justin Collier",
+    "email": "m@jpcx.dev",
+    "url": "https://github.com/jpcx"
+  },
+  "keywords": [
+    "test",
+    "unittest",
+    "unit-test",
+    "small",
+    "tiny",
+    "asynchronous",
+    "nesting",
+    "zero-dependency",
+    "single-file"
+  ],
+  "main": "testts.js",
+  "types": "testts.d.ts",
+  "scripts": {
+    "build": "tsc --pretty && chmod a+x testts.js",
+    "build-test": "tsc -p test",
+    "build-all": "npm run-script build && npm run-script build-test",
+    "clean": "rm -f testts.js testts.d.ts",
+    "clean-test": "rm -rf test/dist",
+    "clean-all": "npm run-script clean && npm run-script clean-test",
+    "test": "./test/node_modules/.bin/testts test/dist",
+    "prepare": "npm run-script clean-all && npm run-script build-all && npm test"
+  },
+  "bin": {
+    "testts": "./testts.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.3.2",
+    "@types/node": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
+}
