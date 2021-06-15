@@ -550,7 +550,6 @@ async function globalTestLauncher() {
       process.argv[i].trim() === "--match" ||
       process.argv[i].trim() === "-m"
     ) {
-      console.log("heeey");
       matcher = process.argv[i + 1];
       process.argv.splice(i, 2);
     }
