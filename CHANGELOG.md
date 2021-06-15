@@ -6,7 +6,7 @@
 
 ### Fixed
 
-- Fixed test.throws for Error base constructor + message
+- Fixed test.throws for Error base constructor + message; added unit tests
 
 ## [0.3.2](https://github.com/jpcx/testts/releases/tag/0.3.2)
 
