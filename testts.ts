@@ -453,7 +453,7 @@ function makeAPI(
       }
     } else if (typeof throwOrTestDescr === "function") {
       // if arg0 is a function, it is either a throw predicate or constructor
-      if (throwOrTestDescr.prototype instanceof Error) {
+      if (throwOrTestDescr === Error || throwOrTestDescr.prototype instanceof Error) {
         if (typeof messageOrBody === "string") {
           // arg0 is an error constructor; arg1 an error message
           return genTestFn({

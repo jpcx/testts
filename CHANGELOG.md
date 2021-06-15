@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.3.2...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.3.3...devel)
+
+## [0.3.3](https://github.com/jpcx/testts/releases/tag/0.3.3)
+
+### Fixed
+
+- Fixed test.throws for Error base constructor + message
 
 ## [0.3.2](https://github.com/jpcx/testts/releases/tag/0.3.2)
 
