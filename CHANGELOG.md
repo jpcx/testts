@@ -1,6 +1,12 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.3.5...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.3.6...devel)
+
+## [0.3.6](https://github.com/jpcx/testts/releases/tag/0.3.6)
+
+### Fixed
+
+- Loosened dev dependency version requirements
 
 ## [0.3.5](https://github.com/jpcx/testts/releases/tag/0.3.5)
 

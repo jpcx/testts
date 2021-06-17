@@ -1,6 +1,6 @@
 {
   "name": "@jpcx/testts",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "an asynchronous, nesting, composable testing framework for TypeScript [zero-dependency]",
   "license": "LGPL-3.0-or-later",
   "repository": "git://github.com/jpcx/testts.git",
@@ -35,8 +35,8 @@
   "bin": "./testts.js",
   "dependencies": {},
   "devDependencies": {
-    "typescript": "^4.3.2",
-    "@types/node": "^15.12.2"
+    "@types/node": "^15.0.0",
+    "typescript": "^4.0.0"
   },
   "engines": {
     "node": ">=10.0.0"
