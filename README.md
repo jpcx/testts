@@ -1,4 +1,4 @@
-# [testts 0.3.5](https://github.com/jpcx/testts/blob/0.3.5/CHANGELOG.md)
+# [testts 0.3.6](https://github.com/jpcx/testts/blob/0.3.6/CHANGELOG.md)
 
 ![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
