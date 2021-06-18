@@ -36,7 +36,6 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as assert from "assert";
 
 export type NonPromise<T> = T extends Promise<any> ? never : T;
 export type TestBodySync<T> = (test: API) => NonPromise<T>;
@@ -262,9 +261,9 @@ class Test<T> {
   constructor(
     description: string,
     body: TestBody<T>,
-    dataListener: (data?: T) => void,
-    errListener: (err?: any) => void,
-    expectedThrow?: ThrowDescriptor,
+    ondata: (data?: T) => void,
+    onerr: (err?: any) => void,
+    expThrow?: ThrowDescriptor,
     deleteStacks?: boolean
   ) {
     let _error: any | null = null;
@@ -287,14 +286,14 @@ class Test<T> {
             if (deleteStacks && _error instanceof Error) delete _error.stack;
             console.error(_error);
           }
-          if (expectedThrow) {
+          if (expThrow) {
             if (
-              expectedThrow.message ||
-              expectedThrow.constructedBy ||
-              expectedThrow.predicate
+              expThrow.message ||
+              expThrow.constructedBy ||
+              expThrow.predicate
             ) {
               console.error("[expected throw]:");
-              console.error(expectedThrow);
+              console.error(expThrow);
             } else {
               console.error("[expected throw]");
             }
@@ -330,14 +329,14 @@ class Test<T> {
           console.error(_error);
           _STDIO_MANIP_.indentNewlinesOnly = false;
         }
-        if (expectedThrow) {
+        if (expThrow) {
           if (
-            expectedThrow.message ||
-            expectedThrow.constructedBy ||
-            expectedThrow.predicate
+            expThrow.message ||
+            expThrow.constructedBy ||
+            expThrow.predicate
           ) {
             console.error("[expected throw]:");
-            console.error(expectedThrow);
+            console.error(expThrow);
           } else {
             console.error("[expected throw]");
           }
@@ -351,36 +350,36 @@ class Test<T> {
         const result = await body(
           makeAPI((v) => _children.push(v), deleteStacks)
         );
-        if (!expectedThrow) {
+        if (!expThrow) {
           ++_N_TESTS_PASSED_;
           _passed = true;
-          dataListener(result);
+          ondata(result);
           resolve();
         } else {
           ++_N_TESTS_FAILED_;
           _passed = false;
-          errListener();
+          onerr();
           resolve();
         }
       } catch (e) {
         _error = e;
-        if (expectedThrow) {
+        if (expThrow) {
           if (
-            expectedThrow.message ||
-            expectedThrow.constructedBy ||
-            expectedThrow.predicate
+            expThrow.message ||
+            expThrow.constructedBy ||
+            expThrow.predicate
           ) {
             // throw was described; check the descriptor
-            if (expectedThrow.predicate) {
-              _passed = !!expectedThrow.predicate(e);
-            } else if (expectedThrow.constructedBy && expectedThrow.message) {
+            if (expThrow.predicate) {
+              _passed = !!expThrow.predicate(e);
+            } else if (expThrow.constructedBy && expThrow.message) {
               _passed =
-                e instanceof expectedThrow.constructedBy &&
-                e.message === expectedThrow.message;
-            } else if (expectedThrow.constructedBy) {
-              _passed = e instanceof expectedThrow.constructedBy;
-            } else if (expectedThrow.message) {
-              _passed = e.message === expectedThrow.message;
+                e instanceof expThrow.constructedBy &&
+                e.message === expThrow.message;
+            } else if (expThrow.constructedBy) {
+              _passed = e instanceof expThrow.constructedBy;
+            } else if (expThrow.message) {
+              _passed = e.message === expThrow.message;
             } else {
               _passed = false;
             }
@@ -392,11 +391,11 @@ class Test<T> {
         }
         if (_passed) {
           ++_N_TESTS_PASSED_;
-          dataListener();
+          ondata();
           resolve();
         } else {
           ++_N_TESTS_FAILED_;
-          errListener(e);
+          onerr(e);
           resolve();
         }
       }
@@ -453,7 +452,10 @@ function makeAPI(
       }
     } else if (typeof throwOrTestDescr === "function") {
       // if arg0 is a function, it is either a throw predicate or constructor
-      if (throwOrTestDescr === Error || throwOrTestDescr.prototype instanceof Error) {
+      if (
+        throwOrTestDescr === Error ||
+        throwOrTestDescr.prototype instanceof Error
+      ) {
         if (typeof messageOrBody === "string") {
           // arg0 is an error constructor; arg1 an error message
           return genTestFn({
@@ -564,7 +566,6 @@ async function globalTestLauncher() {
         (test) => {
           module.exports = {
             test,
-            assert,
           };
           require(p);
         },
