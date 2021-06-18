@@ -18,7 +18,7 @@
  *                    @link https://github.com/jpcx/testts                    *
  *                                                                            *
  *  @license LGPL-3.0-or-later                                                *
- *  @copyright (C) 2021 @author Justin Collier <m@jpcx.dev>                   *
+ *  @copyright (C) 2021 Justin Collier <m@jpcx.dev>                           *
  *                                                                            *
  *    This program is free software: you can redistribute it and/or modify    *
  *    it under the terms of the GNU Lesser General Public License as          *
@@ -37,8 +37,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export type NonPromise<T> = T extends Promise<any> ? never : T;
-export type TestBodySync<T> = (test: API) => NonPromise<T>;
+export type TestBodySync<T> = (test: API) => T;
 export type TestBodyAsync<T> = (test: API) => Promise<T>;
 export type TestBody<T> = TestBodySync<T> | TestBodyAsync<T>;
 export type Predicate<T extends Array<any>> = (...args: T) => any;
@@ -49,27 +48,17 @@ export interface ErrorSubConstructor {
   prototype: ErrorSub;
 }
 
-/**
- * Registers a new test.
- *
- * @param    description  - any string description to describe the test
- * @param    body         - execution body that should throw on failure
- * @property throws       - describe an expected throw
- * @property deleteStacks - optionally delete stack traces; deletes Error stacks
- * @return   Promise<T>   - promises any value returned by the body
- */
+/** Registers a new test.  */
 export type API = typeof test;
-/**
- * Registers a new test.
- *
- * @param    description  - any string description to describe the test
- * @param    body         - execution body that should throw on failure
- * @property throws       - describe an expected throw
- * @property deleteStacks - optionally delete stack traces; deletes Error stacks
- * @return   Promise<T>   - promises any value returned by the body
- */
+/** Registers a new test.  */
 export declare const test: {
+  /**
+   * Registers a new test.
+   * @param    description  - any string description to describe the test.
+   * @param    body         - execution body that should throw on failure.
+   */
   <T>(description: string, body: TestBody<T>): Promise<T>;
+  /** Describe an expected throw */
   throws: {
     (constructor: ErrorSubConstructor, message?: string): API;
     (message: string): API;
@@ -77,7 +66,13 @@ export declare const test: {
     (): API;
     <T>(description: string, body: TestBody<T>): Promise<T>;
   };
-  deleteStacks(setting?: boolean): void;
+  /**
+   * Delete stack traces (setting=true).
+   * Optionally pass this settings to children (passToChildren=true)
+   */
+  deleteStacks(setting?: boolean, passToChildren?: boolean): void;
+  /** Optionally set an execution priority (setting=0) */
+  priority(setting?: number): void;
 };
 
 type ThrowDescriptor = {
@@ -251,49 +246,108 @@ async function findTestPaths(
   return result;
 }
 
-interface Test<T> {
-  readonly onceReady: Promise<void>;
-  readonly passed: boolean;
-  getResult: () => T | Promise<T>;
-  log: () => Promise<void>;
-}
-class Test<T> {
-  constructor(
-    description: string,
-    body: TestBody<T>,
-    ondata: (data?: T) => void,
-    onerr: (err?: any) => void,
-    expThrow?: ThrowDescriptor,
-    deleteStacks?: boolean
-  ) {
-    let _error: any | null = null;
-    let _passed: boolean = false;
-
-    const _children: Test<any>[] = [];
-
-    this.log = async () => {
-      let anyChildrenFailed = false;
-      if (_children.length) {
-        console.log(TEST + " " + description);
+function testsBySortedPriority(
+  tests: Test<any>[]
+): Array<[number, Test<any>[]]> {
+  return tests
+    .reduce((a, test) => {
+      const existingIdx = a.findIndex((x) => x[0] === test.priority);
+      if (existingIdx !== -1) {
+        a[existingIdx][1].push(test);
       } else {
-        if (_passed) {
-          console.log(PASS + " " + description);
+        a.push([test.priority, [test]]);
+      }
+      return a;
+    }, [] as Array<[number, Test<any>[]]>)
+    .sort((a, b) => (a[0] <= b[0] ? -1 : 1));
+}
+
+class Test<T> {
+  public get priority() {
+    return this.#priority;
+  }
+  public get passed() {
+    return this.#passed;
+  }
+
+  public async execute(): Promise<T> {
+      try {
+        const result = await this.#body(
+          makeAPI(
+            (child) => this.#children.push(child),
+            (priority) => {
+              this.#priority = priority;
+            },
+            this.#deleteStacks
+          )
+        );
+        if (!this.#throws) {
+          ++_N_TESTS_PASSED_;
+          this.#passed = true;
+          return result;
         } else {
-          console.error(FAIL + " " + description);
+          ++_N_TESTS_FAILED_;
+          this.#passed = false;
+          throw new Error("bad error");
+        }
+      } catch (e) {
+        this.#error = e;
+        if (this.#throws) {
+          if (this.#throws.message || this.#throws.constructedBy || this.#throws.predicate) {
+            // throw was described; check the descriptor
+            if (this.#throws.predicate) {
+              this.#passed = !!this.#throws.predicate(e);
+            } else if (this.#throws.constructedBy && this.#throws.message) {
+              this.#passed =
+                e instanceof this.#throws.constructedBy &&
+                e.message === this.#throws.message;
+            } else if (this.#throws.constructedBy) {
+              this.#passed = e instanceof this.#throws.constructedBy;
+            } else if (this.#throws.message) {
+              this.#passed = e.message === this.#throws.message;
+            } else {
+              this.#passed = false;
+            }
+          } else {
+            this.#passed = true;
+          }
+        } else {
+          this.#passed = false;
+        }
+        if (this.#passed) {
+          ++_N_TESTS_PASSED_;
+          return undefined as any;
+        } else {
+          ++_N_TESTS_FAILED_;
+          throw new Error("bad error")
+        }
+      }
+
+  }
+  // public async executeChildren(): Promise<void> {}
+  public async log(): Promise<void> {
+      let anyChildrenFailed = false;
+      if (this.#children.length) {
+        console.log(TEST + " " + this.#description);
+      } else {
+        if (this.#passed) {
+          console.log(PASS + " " + this.#description);
+        } else {
+          console.error(FAIL + " " + this.#description);
 
           _STDIO_MANIP_.indent += 2;
-          if (_error) {
-            if (deleteStacks && _error instanceof Error) delete _error.stack;
-            console.error(_error);
+          if (this.#error) {
+            if (this.#deleteStacks && this.#error instanceof Error) delete this.#error.stack;
+            console.error(this.#error);
           }
-          if (expThrow) {
+          if (this.#throws) {
             if (
-              expThrow.message ||
-              expThrow.constructedBy ||
-              expThrow.predicate
+              this.#throws.message ||
+              this.#throws.constructedBy ||
+              this.#throws.predicate
             ) {
               console.error("[expected throw]:");
-              console.error(expThrow);
+              console.error(this.#throws);
             } else {
               console.error("[expected throw]");
             }
@@ -301,122 +355,80 @@ class Test<T> {
           _STDIO_MANIP_.indent -= 2;
         }
       }
-      let nChildrenBefore = _children.length;
-      for (const child of _children) {
-        _STDIO_MANIP_.indent += 2;
-        await child.onceReady;
-        await child.log();
-        anyChildrenFailed = anyChildrenFailed || !child.passed;
-        _STDIO_MANIP_.indent -= 2;
+      let nChildrenBefore = this.#children.length;
+      for (const pc of testsBySortedPriority(this.#children)) {
+        for (const child of pc[1]) {
+          _STDIO_MANIP_.indent += 2;
+          await child.onceReady;
+          await child.log();
+          anyChildrenFailed = anyChildrenFailed || !child.passed;
+          _STDIO_MANIP_.indent -= 2;
+        }
       }
-      if (_children.length > nChildrenBefore)
+      if (this.#children.length > nChildrenBefore)
         throw new TesttsTypeError(
           "found a subchild attached to a non-immediate parent... " +
             "check for missing `test` parameters"
         );
-      if (anyChildrenFailed && _passed) {
+      if (anyChildrenFailed && this.#passed) {
         // if any children failed but this test body did not, report failure
         --_N_TESTS_PASSED_;
         ++_N_TESTS_FAILED_;
-        _passed = false;
+        this.#passed = false;
         console.error(FAIL);
-      } else if (_children.length && !_passed) {
+      } else if (this.#children.length && !this.#passed) {
         // else if there was child output for a failed parent, report failure
         process.stdout.write(FAIL + " ");
         _STDIO_MANIP_.indent += 2;
-        if (_error) {
+        if (this.#error) {
           _STDIO_MANIP_.indentNewlinesOnly = true;
-          console.error(_error);
+          console.error(this.#error);
           _STDIO_MANIP_.indentNewlinesOnly = false;
         }
-        if (expThrow) {
+        if (this.#throws) {
           if (
-            expThrow.message ||
-            expThrow.constructedBy ||
-            expThrow.predicate
+            this.#throws.message ||
+            this.#throws.constructedBy ||
+            this.#throws.predicate
           ) {
             console.error("[expected throw]:");
-            console.error(expThrow);
+            console.error(this.#throws);
           } else {
             console.error("[expected throw]");
           }
         }
         _STDIO_MANIP_.indent -= 2;
       }
-    };
 
-    const _onceReady = new Promise<void>(async (resolve) => {
-      try {
-        const result = await body(
-          makeAPI((v) => _children.push(v), deleteStacks)
-        );
-        if (!expThrow) {
-          ++_N_TESTS_PASSED_;
-          _passed = true;
-          ondata(result);
-          resolve();
-        } else {
-          ++_N_TESTS_FAILED_;
-          _passed = false;
-          onerr();
-          resolve();
-        }
-      } catch (e) {
-        _error = e;
-        if (expThrow) {
-          if (
-            expThrow.message ||
-            expThrow.constructedBy ||
-            expThrow.predicate
-          ) {
-            // throw was described; check the descriptor
-            if (expThrow.predicate) {
-              _passed = !!expThrow.predicate(e);
-            } else if (expThrow.constructedBy && expThrow.message) {
-              _passed =
-                e instanceof expThrow.constructedBy &&
-                e.message === expThrow.message;
-            } else if (expThrow.constructedBy) {
-              _passed = e instanceof expThrow.constructedBy;
-            } else if (expThrow.message) {
-              _passed = e.message === expThrow.message;
-            } else {
-              _passed = false;
-            }
-          } else {
-            _passed = true;
-          }
-        } else {
-          _passed = false;
-        }
-        if (_passed) {
-          ++_N_TESTS_PASSED_;
-          ondata();
-          resolve();
-        } else {
-          ++_N_TESTS_FAILED_;
-          onerr(e);
-          resolve();
-        }
-      }
-    });
-
-    Object.defineProperty(this, "onceReady", {
-      get: () => _onceReady,
-      enumerable: true,
-      configurable: false,
-    });
-
-    Object.defineProperty(this, "passed", {
-      get: () => _passed,
-      enumerable: true,
-      configurable: false,
-    });
   }
+
+  constructor(
+    description: string,
+    body: TestBody<T>,
+    ondata: (data?: T) => void,
+    onerr: (err?: any) => void,
+    throws?: ThrowDescriptor,
+    deleteStacks?: boolean
+  ) {
+    this.#description = description;
+    this.#throws = throws;
+    this.#deleteStacks = deleteStacks;
+    this.#body = body;
+  }
+
+  #priority = 0;
+  #description: string;
+  #deleteStacks?: boolean;
+  #passed = false;
+  #error: any | null = null;
+  #throws?: ThrowDescriptor;
+  #children: Test<any>[] = [];
+  #body: TestBody<T>;
 }
 
 function makeAPI(
   registerChild: <T>(child: Test<T>) => void,
+  registerPriority: (priority: number) => void,
   deleteStacks?: boolean
 ): API {
   function throws(constructor: ErrorSubConstructor, message?: string): API;
@@ -500,6 +512,7 @@ function makeAPI(
     }
   }
   function genTestFn(expectedThrow?: ThrowDescriptor) {
+    let passDeleteStacks = true;
     const test = <T>(description: string, body: TestBody<T>): Promise<T> => {
       if (typeof body !== "function")
         throw new TesttsArgumentError(
@@ -512,7 +525,7 @@ function makeAPI(
           resolve as (data?: T) => void,
           reject,
           expectedThrow,
-          deleteStacks
+          passDeleteStacks ? deleteStacks : false
         );
         registerChild(t);
       });
@@ -520,8 +533,12 @@ function makeAPI(
       return execution;
     };
     test.throws = throws;
-    test.deleteStacks = (setting = true) => {
+    test.deleteStacks = (setting = true, passToChildren = true) => {
       deleteStacks = setting;
+      passDeleteStacks = passToChildren;
+    };
+    test.priority = (setting = 0) => {
+      registerPriority(setting);
     };
     return test;
   }
@@ -574,9 +591,14 @@ async function globalTestLauncher() {
       )
     );
   }
-  for (const ft of fileTests) {
-    await ft.onceReady;
-    await ft.log();
+  console.log(testsBySortedPriority(fileTests));
+  for (const pt of testsBySortedPriority(fileTests)) {
+    for (const t of pt[1]) {
+      await t.onceReady;
+    }
+    for (const t of pt[1]) {
+      await t.log();
+    }
   }
 }
 

@@ -23,6 +23,16 @@
   "files": [
     "src/testts.test.ts",
     "src/testts.multifile.test.ts",
-    "src/testts.multifile_fail.test.ts"
+    "src/testts.multifile_fail.test.ts",
+    "src/testts.filepriority0.test.ts",
+    "src/testts.filepriority1.test.ts",
+    "src/testts.filepriority2.test.ts",
+    "src/testts.filepriority3.test.ts",
+    "src/testts.filepriority4.test.ts",
+    "src/testts.filepriority5.test.ts",
+    "src/testts.filepriority6.test.ts",
+    "src/testts.filepriority7.test.ts",
+    "src/testts.filepriority8.test.ts",
+    "src/testts.filepriority9.test.ts"
   ]
 }

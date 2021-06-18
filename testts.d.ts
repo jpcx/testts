@@ -20,5 +20,6 @@ export declare const test: {
         (): API;
         <T>(description: string, body: TestBody<T>): Promise<T>;
     };
-    deleteStacks(setting?: boolean): void;
+    deleteStacks(setting?: boolean, passToChildren?: boolean): void;
+    priority(setting?: number): void;
 };
