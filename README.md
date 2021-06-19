@@ -37,11 +37,25 @@ There are two test registrars, `test(descr, body)` and `test.throws(...?)?(descr
 
 #### Settings
 
-Settings are applied to `test` functions and are passed on to children
+From anywhere in the test files:
 
 - `test.deleteStacks(boolean = true): void`
   - Deletes stack traces from Error instances thrown during failures.
   - If output is congested with errors, this will improve readability.
+
+Using the configuration file `$PWD/.testts.json`:
+
+```ts
+{
+  prioritized: string[]
+}
+```
+
+- `prioritized`
+  - Allows for specifying certain test paths for independent, ordered execution.
+  - If some of your tests require timing and you don't want the event loop populated during execution, be sure to list them here.
+  - Prioritized tests happen first, and are each completed before the next execution.
+    - (By default, tests execute all of their children and then wait for each one afterwards).
 
 ### Notes
 
