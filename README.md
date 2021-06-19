@@ -54,9 +54,10 @@ Using the configuration file `$PWD/.testts.json`:
 
 - `prioritized`
   - Allows for specifying certain test paths for independent, ordered execution.
-  - If some of your test files require timing assertions and you can't have the event loop congested during their execution, be sure to list them here.
-  - Prioritized test files happen before the others; each one is fully executed and logged before the next.
-    - (By default, tests are registered and executed asynchronously)
+  - Allows specifying execution order (for circular dependencies or otherwise).
+  - Provides each listed test with its own execution environment:
+    - If some of your test files require timing and can't have the event loop congested, list them here. (By default, all tests are executed asynchronously).
+  - Prioritized tests are executed before all others.
 
 ### Notes
 
