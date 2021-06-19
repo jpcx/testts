@@ -564,7 +564,7 @@ process.addListener("exit", (code) => {
     console.log(
       "\n\x1b[32mtestts test passed!\x1b[0m" +
         "\nwe exited (1) as expected, and failed the correct tests!" +
-        '\nyou should see "passed [93/135] tests" above.' +
+        '\nyou should see "\x1b[31mpassed [113/155] tests\x1b[0m" above.' +
         "\nif not, please let me know at m@jpcx.dev"
     );
     process.exit(0);

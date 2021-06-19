@@ -1,0 +1,14 @@
+{
+  "prioritized": [
+    "test/dist/testts.filepriority0.test.js",
+    "test/dist/testts.filepriority2.test.js",
+    "test/dist/testts.filepriority4.test.js",
+    "test/dist/testts.filepriority6.test.js",
+    "test/dist/testts.filepriority8.test.js",
+    "test/dist/testts.filepriority1.test.js",
+    "test/dist/testts.filepriority3.test.js",
+    "test/dist/testts.filepriority5.test.js",
+    "test/dist/testts.filepriority7.test.js",
+    "test/dist/testts.filepriority9.test.js"
+  ]
+}

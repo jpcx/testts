@@ -34,11 +34,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ****/
 
 import { test } from "@jpcx/testts";
+import * as assert from "assert";
 
 const PRIORITY = 0;
 
-test.priority(PRIORITY);
-
-test(`test prioritized file execution (initialization priority ${PRIORITY})`, () => {
+test(`test prioritized file execution (priority ${PRIORITY})`, () => {
+  assert(
+    (<any>global)._testts_test_global_priority_test ===
+      (PRIORITY as number === 0 ? undefined : PRIORITY - 1)
+  );
   (<any>global)._testts_test_global_priority_test = PRIORITY;
 });

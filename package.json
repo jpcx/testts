@@ -29,7 +29,7 @@
     "clean": "rm -f testts.js testts.d.ts",
     "clean-test": "rm -rf test/dist",
     "clean-all": "npm run-script clean && npm run-script clean-test",
-    "test": "./test/node_modules/.bin/@jpcx/testts test/dist",
+    "test": "./test/node_modules/.bin/@jpcx/testts test/dist test/dist/testts.test.js",
     "prepare": "npm run-script clean-all && npm run-script build-all && npm test"
   },
   "bin": "./testts.js",

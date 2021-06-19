@@ -36,19 +36,12 @@
 import { test } from "@jpcx/testts";
 import * as assert from "assert";
 
-function nonzeroRandom() {
-  while (true) {
-    const r = Math.random();
-    if (r !== 0) return r;
-  }
-}
-
-const PRIORITY = nonzeroRandom();
-
-test.priority(PRIORITY);
+const PRIORITY = 6;
 
 test(`test prioritized file execution (priority ${PRIORITY})`, () => {
-  assert((<any>global)._testts_test_global_priority_test !== undefined);
-  assert((<any>global)._testts_test_global_priority_test < PRIORITY);
+  assert(
+    (<any>global)._testts_test_global_priority_test ===
+      ((PRIORITY as number) === 0 ? undefined : PRIORITY - 1)
+  );
   (<any>global)._testts_test_global_priority_test = PRIORITY;
 });

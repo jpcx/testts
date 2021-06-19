@@ -37,10 +37,20 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export type TestBodySync<T> = (test: TestAPI) => T;
-export type TestBodyAsync<T> = (test: TestAPI) => Promise<T>;
+export type TestBodySync<T> = (test: TestRegistrar) => T;
+export type TestBodyAsync<T> = (test: TestRegistrar) => Promise<T>;
 export type TestBody<T> = TestBodySync<T> | TestBodyAsync<T>;
 export type Predicate<T extends Array<any>> = (...args: T) => any;
+
+/** testts configuration file type (from `.testts.json` in cwd) */
+export type Settings = {
+  /**
+   * A list of paths to prioritize.
+   * Each prioritized test file executes before all other tests.
+   * Execution order follows array order.
+   */
+  prioritized: string[];
+};
 
 export interface ErrorSub extends Error {}
 export interface ErrorSubConstructor {
@@ -49,7 +59,7 @@ export interface ErrorSubConstructor {
 }
 
 /** Registers a new test.  */
-export type TestAPI = typeof test;
+export type TestRegistrar = typeof test;
 /** Registers a new test.  */
 export declare const test: {
   /**
@@ -60,10 +70,10 @@ export declare const test: {
   <T>(description: string, body: TestBody<T>): Promise<T>;
   /** Describe an expected throw */
   throws: {
-    (constructor: ErrorSubConstructor, message?: string): TestAPI;
-    (message: string): TestAPI;
-    (isCorrectThrow: Predicate<[ErrorSub | any]>): TestAPI;
-    (): TestAPI;
+    (constructor: ErrorSubConstructor, message?: string): TestRegistrar;
+    (message: string): TestRegistrar;
+    (isCorrectThrow: Predicate<[ErrorSub | any]>): TestRegistrar;
+    (): TestRegistrar;
     <T>(description: string, body: TestBody<T>): Promise<T>;
   };
   /**
@@ -71,8 +81,6 @@ export declare const test: {
    * Optionally pass this settings to children (passToChildren=true)
    */
   deleteStacks(setting?: boolean, passToChildren?: boolean): void;
-  /** Optionally set an execution priority (setting=0) */
-  priority(setting?: number): void;
 };
 
 type ThrowDescriptor = {
@@ -181,11 +189,11 @@ const TEST_PROMISES: WeakSet<Promise<any>> = new WeakSet();
 let N_TESTS_PASSED = 0;
 let N_TESTS_FAILED = 0;
 
-async function findTestPaths(
-  matcher: string = "\\.test\\.js"
+async function findPaths(
+  testMatcher: string = "\\.test\\.js$"
 ): Promise<string[]> {
-  const result: string[] = await (async () => {
-    const _: string[] = [];
+  const result: Set<string> = await (async () => {
+    const _ = new Set<string>();
     // collect any manually specified files first
     for (let i = 2; i < process.argv.length; ++i) {
       const cur = process.argv[i];
@@ -196,7 +204,7 @@ async function findTestPaths(
         })
       );
       if (stats.isFile()) {
-        _.push(path.resolve(cur));
+        _.add(path.resolve(cur));
         process.argv.splice(i, 1);
         --i;
       }
@@ -214,7 +222,9 @@ async function findTestPaths(
     );
     if (stats.isFile()) {
       const name = path.basename(cur);
-      if (name.match(new RegExp(matcher, "m"))) result.push(path.resolve(cur));
+      if (name.match(new RegExp(testMatcher, "m"))) {
+        result.add(path.resolve(cur));
+      }
     } else if (stats.isDirectory()) {
       const subs: string[] = await new Promise((resolve, reject) =>
         fs.readdir(cur, (err, files) => {
@@ -237,73 +247,23 @@ async function findTestPaths(
     );
   }
 
-  if (result.length === 0)
+  if (result.size === 0)
     throw new TesttsArgumentError(
       "cannot find tests",
       ...process.argv.slice(2)
     );
 
-  return result;
-}
-
-function testsBySortedPriority(
-  tests: Test<any>[]
-): Array<[number, Test<any>[]]> {
-  return tests
-    .reduce((a, test) => {
-      const existingIdx = a.findIndex((x) => x[0] === test.priority);
-      if (existingIdx !== -1) {
-        a[existingIdx][1].push(test);
-      } else {
-        a.push([test.priority, [test]]);
-      }
-      return a;
-    }, [] as Array<[number, Test<any>[]]>)
-    .sort((a, b) => (a[0] <= b[0] ? -1 : 1));
+  return Array.from(result);
 }
 
 class Test<T> {
-  /* public get test(): TestAPI { */
-
-  /* } */
-  public get priority() {
-    return this.#priority;
-  }
   public get passed() {
     return this.#passed;
   }
+  public get onceReady() {
+    return this.#onceReady;
+  }
 
-  public async execute(): Promise<T> {
-    try {
-      return this.#handleSuccessfulExecution(
-        await this.#body(
-          makeAPI(
-            (child) => this.#children.push(child),
-            (priority) => {
-              this.#priority = priority;
-            },
-            this.#deleteStacks
-          )
-        )
-      );
-    } catch (e) {
-      this.#handleFailedExecution(e);
-      throw e;
-    }
-  }
-  public async executeChildren(): Promise<void> {
-    for (const ch of this.#children) {
-      try {
-        await ch.execute();
-      } catch (_) {
-        if (this.#passed) {
-          this.#passed = false;
-          --N_TESTS_PASSED;
-          ++N_TESTS_FAILED;
-        }
-      }
-    }
-  }
   public async log(): Promise<void> {
     let anyChildrenFailed = false;
     if (this.#children.length) {
@@ -336,13 +296,12 @@ class Test<T> {
       }
     }
     let nChildrenBefore = this.#children.length;
-    for (const pc of testsBySortedPriority(this.#children)) {
-      for (const child of pc[1]) {
-        STDIO_MANIP.indent += 2;
-        await child.log();
-        anyChildrenFailed = anyChildrenFailed || !child.passed;
-        STDIO_MANIP.indent -= 2;
-      }
+    for (const child of this.#children) {
+      STDIO_MANIP.indent += 2;
+      await child.onceReady;
+      await child.log();
+      anyChildrenFailed = anyChildrenFailed || !child.passed;
+      STDIO_MANIP.indent -= 2;
     }
     if (this.#children.length > nChildrenBefore)
       throw new TesttsTypeError(
@@ -383,80 +342,88 @@ class Test<T> {
   constructor(
     description: string,
     body: TestBody<T>,
+    ondata: (data?: T) => void,
+    onerr: (err?: any) => void,
     throws?: ThrowDescriptor,
     deleteStacks?: boolean
   ) {
     this.#description = description;
     this.#throws = throws;
     this.#deleteStacks = deleteStacks;
-    this.#body = body;
-  }
-
-  #handleSuccessfulExecution = (result: T): T => {
-    if (!this.#throws) {
-      ++N_TESTS_PASSED;
-      this.#passed = true;
-    } else {
-      ++N_TESTS_FAILED;
-      this.#passed = false;
-    }
-    return result;
-  };
-
-  #handleFailedExecution = (err: any): void => {
-    this.#error = err;
-    if (this.#throws) {
-      if (
-        this.#throws.message ||
-        this.#throws.constructedBy ||
-        this.#throws.predicate
-      ) {
-        // throw was described; check the descriptor
-        if (this.#throws.predicate) {
-          this.#passed = !!this.#throws.predicate(err);
-        } else if (this.#throws.constructedBy && this.#throws.message) {
-          this.#passed =
-            err instanceof this.#throws.constructedBy &&
-            err.message === this.#throws.message;
-        } else if (this.#throws.constructedBy) {
-          this.#passed = err instanceof this.#throws.constructedBy;
-        } else if (this.#throws.message) {
-          this.#passed = err.message === this.#throws.message;
+    this.#onceReady = new Promise<void>(async (resolve) => {
+      try {
+        const result = await body(
+          makeAPI((child) => this.#children.push(child), deleteStacks)
+        );
+        if (!throws) {
+          ++N_TESTS_PASSED;
+          this.#passed = true;
+          ondata(result);
+          resolve();
+        } else {
+          ++N_TESTS_FAILED;
+          this.#passed = false;
+          onerr();
+          resolve();
+        }
+      } catch (e) {
+        this.#error = e;
+        if (throws) {
+          if (throws.message || throws.constructedBy || throws.predicate) {
+            // throw was described; check the descriptor
+            if (throws.predicate) {
+              this.#passed = !!throws.predicate(e);
+            } else if (throws.constructedBy && throws.message) {
+              this.#passed =
+                e instanceof throws.constructedBy &&
+                e.message === throws.message;
+            } else if (throws.constructedBy) {
+              this.#passed = e instanceof throws.constructedBy;
+            } else if (throws.message) {
+              this.#passed = e.message === throws.message;
+            } else {
+              this.#passed = false;
+            }
+          } else {
+            this.#passed = true;
+          }
         } else {
           this.#passed = false;
         }
-      } else {
-        this.#passed = true;
+        if (this.#passed) {
+          ++N_TESTS_PASSED;
+          ondata();
+          resolve();
+        } else {
+          ++N_TESTS_FAILED;
+          onerr(e);
+          resolve();
+        }
       }
-    } else {
-      this.#passed = false;
-    }
-    if (!this.#passed) {
-      ++N_TESTS_PASSED;
-    } else {
-      ++N_TESTS_FAILED;
-    }
-  };
+    });
+  }
 
-  #priority = 0;
   #description: string;
   #deleteStacks?: boolean;
   #passed = false;
   #error: any | null = null;
   #throws?: ThrowDescriptor;
   #children: Test<any>[] = [];
-  #body: TestBody<T>;
+
+  #onceReady: Promise<void>;
 }
 
 function makeAPI(
   registerChild: <T>(child: Test<T>) => void,
-  registerPriority: (priority: number) => void,
   deleteStacks?: boolean
-): TestAPI {
-  function throws(constructor: ErrorSubConstructor, message?: string): TestAPI;
-  function throws(message: string): TestAPI;
-  function throws(isCorrectThrow: Predicate<[ErrorSub | any]>): TestAPI;
-  function throws(): TestAPI;
+): TestRegistrar {
+  function throws(
+    constructor: ErrorSubConstructor,
+    message?: string
+  ): TestRegistrar;
+  function throws(message: string): TestRegistrar;
+  function throws(isCorrectThrow: Predicate<[ErrorSub | any]>): TestRegistrar;
+  function throws(): TestRegistrar;
   function throws<T>(description: string, body: TestBody<T>): Promise<T>;
   function throws<T>(
     throwOrTestDescr?:
@@ -540,14 +507,17 @@ function makeAPI(
         throw new TesttsArgumentError(
           "tests with descriptions require a test body"
         );
-      const t = new Test(
-        description,
-        body,
-        expectedThrow,
-        passDeleteStacks ? deleteStacks : false
-      );
-      registerChild(t);
-      const execution = t.execute();
+      const execution: Promise<T> = new Promise((resolve, reject) => {
+        const t = new Test(
+          description,
+          body,
+          resolve as (data?: T) => void,
+          reject,
+          expectedThrow,
+          passDeleteStacks ? deleteStacks : false
+        );
+        registerChild(t);
+      });
       TEST_PROMISES.add(execution);
       return execution;
     };
@@ -555,9 +525,6 @@ function makeAPI(
     test.deleteStacks = (setting = true, passToChildren = true) => {
       deleteStacks = setting;
       passDeleteStacks = passToChildren;
-    };
-    test.priority = (setting = 0) => {
-      registerPriority(setting);
     };
     return test;
   }
@@ -593,9 +560,22 @@ async function globalTestLauncher() {
     }
   }
 
-  const paths = await findTestPaths(matcher);
-  const fileTests: Test<void>[] = [];
-  for (const p of paths) {
+  const paths = await findPaths(matcher);
+
+  const settings: Settings = (() => {
+    try {
+      const o = require(path.join(process.cwd(), "./.testts.json"));
+      o.prioritized = (<Settings>o).prioritized
+        .map((p) => path.resolve(p))
+        .filter((p) => paths.includes(p));
+      return o;
+    } catch (e) {
+      return { prioritized: [] };
+    }
+  })();
+
+  // handle all prioritized file tests separately, and individually
+  for (const p of settings.prioritized) {
     const t = new Test(
       ANSI_CYAN_FG + path.relative(process.cwd(), p) + ANSI_RESET,
       (test) => {
@@ -603,17 +583,38 @@ async function globalTestLauncher() {
           test,
         };
         require(p);
-      }
+      },
+      () => {},
+      () => {}
     );
-    await t.execute();
-    fileTests.push(t);
+    await t.onceReady;
+    await t.log();
   }
-  console.log(testsBySortedPriority(fileTests));
-  for (const pt of testsBySortedPriority(fileTests)) {
-    for (const t of pt[1]) {
-      await t.executeChildren();
-      await t.log();
-    }
+
+  // collect all non-prioritized file tests, triggering file execution.
+  // if asynchronous, initiates all top-level async operations before awaiting
+  const nonPrioritized: Test<void>[] = [];
+
+  for (const p of paths) {
+    if (settings.prioritized.includes(p)) continue;
+    nonPrioritized.push(
+      new Test(
+        ANSI_CYAN_FG + path.relative(process.cwd(), p) + ANSI_RESET,
+        (test) => {
+          module.exports = {
+            test,
+          };
+          require(p);
+        },
+        () => {},
+        () => {}
+      )
+    );
+  }
+  // await and log all of the tests
+  for (const t of nonPrioritized) {
+    await t.onceReady;
+    await t.log();
   }
 }
 
