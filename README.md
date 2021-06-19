@@ -42,7 +42,7 @@ From anywhere in the test files:
 - `test.deleteStacks(setting=true, passToChildren=true): void`
   - Deletes stack traces from Error instances thrown during failures.
   - If output is congested with errors, this will improve readability.
-  - `deleteStacks` applies to the test parent and all of its children (unless passToChildren is false).
+  - `deleteStacks` applies to the current test and all of its children (unless passToChildren is false).
 
 Using the configuration file `$PWD/.testts.json`:
 
