@@ -37,9 +37,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export type TestBodySync<T> = (test: TestRegistrar) => T;
-export type TestBodyAsync<T> = (test: TestRegistrar) => Promise<T>;
-export type TestBody<T> = TestBodySync<T> | TestBodyAsync<T>;
+export type TestBody<T> = (test: TestRegistrar) => T|Promise<T>;
 export type Predicate<T extends Array<any>> = (...args: T) => any;
 
 /** testts configuration file type (from `.testts.json` in cwd) */

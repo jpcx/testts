@@ -1,6 +1,16 @@
 # Changelog
 
-## [Upcoming](https://github.com/jpcx/testts/compare/0.3.6...devel)
+## [Upcoming](https://github.com/jpcx/testts/compare/0.4.0...devel)
+
+## [0.4.0](https://github.com/jpcx/testts/releases/tag/0.4.0)
+
+### Added
+
+- Added ability to prioritize files for independent, ordered execution
+
+### Fixed
+
+- Minor fixes and reorganization
 
 ## [0.3.6](https://github.com/jpcx/testts/releases/tag/0.3.6)
 
