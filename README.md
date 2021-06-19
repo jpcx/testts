@@ -1,4 +1,4 @@
-# [testts 0.3.6](https://github.com/jpcx/testts/blob/0.3.6/CHANGELOG.md)
+# [testts 0.4.0](https://github.com/jpcx/testts/blob/0.4.0/CHANGELOG.md)
 
 ![](https://github.com/jpcx/testts/blob/assets/logo.png)
 
@@ -37,11 +37,26 @@ There are two test registrars, `test(descr, body)` and `test.throws(...?)?(descr
 
 #### Settings
 
-Settings are applied to `test` functions and are passed on to children
+From anywhere in the test files:
 
-- `test.deleteStacks(boolean = true): void`
+- `test.deleteStacks(setting=true, passToChildren=true): void`
   - Deletes stack traces from Error instances thrown during failures.
   - If output is congested with errors, this will improve readability.
+  - `deleteStacks` applies to the test parent and all of its children (unless passToChildren is false).
+
+Using the configuration file `$PWD/.testts.json`:
+
+```ts
+{
+  prioritized: string[]
+}
+```
+
+- `prioritized`
+  - Allows for specifying certain test paths for independent, ordered execution.
+  - If some of your tests require timing and you don't want the event loop populated during execution, be sure to list them here.
+  - Prioritized tests happen first, and are each completed before the next execution.
+    - (By default, tests execute all of their children and then wait for each one afterwards).
 
 ### Notes
 

@@ -18,7 +18,7 @@
  *                    @link https://github.com/jpcx/testts                    *
  *                                                                            *
  *  @license LGPL-3.0-or-later                                                *
- *  @copyright (C) 2021 @author Justin Collier <m@jpcx.dev>                   *
+ *  @copyright (C) 2021 Justin Collier <m@jpcx.dev>                           *
  *                                                                            *
  *    This program is free software: you can redistribute it and/or modify    *
  *    it under the terms of the GNU Lesser General Public License as          *
@@ -36,13 +36,19 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as assert from "assert";
 
-export type NonPromise<T> = T extends Promise<any> ? never : T;
-export type TestBodySync<T> = (test: API) => NonPromise<T>;
-export type TestBodyAsync<T> = (test: API) => Promise<T>;
-export type TestBody<T> = TestBodySync<T> | TestBodyAsync<T>;
+export type TestBody<T> = (test: TestRegistrar) => T | Promise<T>;
 export type Predicate<T extends Array<any>> = (...args: T) => any;
+
+/** testts configuration file type (from `.testts.json` in cwd) */
+export type Settings = {
+  /**
+   * A list of paths to prioritize.
+   * Each prioritized test file executes before all other tests.
+   * Execution order follows array order.
+   */
+  prioritized: string[];
+};
 
 export interface ErrorSub extends Error {}
 export interface ErrorSubConstructor {
@@ -50,35 +56,29 @@ export interface ErrorSubConstructor {
   prototype: ErrorSub;
 }
 
-/**
- * Registers a new test.
- *
- * @param    description  - any string description to describe the test
- * @param    body         - execution body that should throw on failure
- * @property throws       - describe an expected throw
- * @property deleteStacks - optionally delete stack traces; deletes Error stacks
- * @return   Promise<T>   - promises any value returned by the body
- */
-export type API = typeof test;
-/**
- * Registers a new test.
- *
- * @param    description  - any string description to describe the test
- * @param    body         - execution body that should throw on failure
- * @property throws       - describe an expected throw
- * @property deleteStacks - optionally delete stack traces; deletes Error stacks
- * @return   Promise<T>   - promises any value returned by the body
- */
+/** Registers a new test.  */
+export type TestRegistrar = typeof test;
+/** Registers a new test.  */
 export declare const test: {
+  /**
+   * Registers a new test.
+   * @param    description  - any string description to describe the test.
+   * @param    body         - execution body that should throw on failure.
+   */
   <T>(description: string, body: TestBody<T>): Promise<T>;
+  /** Describe an expected throw */
   throws: {
-    (constructor: ErrorSubConstructor, message?: string): API;
-    (message: string): API;
-    (isCorrectThrow: Predicate<[ErrorSub | any]>): API;
-    (): API;
+    (constructor: ErrorSubConstructor, message?: string): TestRegistrar;
+    (message: string): TestRegistrar;
+    (isCorrectThrow: Predicate<[ErrorSub | any]>): TestRegistrar;
+    (): TestRegistrar;
     <T>(description: string, body: TestBody<T>): Promise<T>;
   };
-  deleteStacks(setting?: boolean): void;
+  /**
+   * Delete stack traces (setting=true).
+   * Optionally pass this settings to children (passToChildren=true)
+   */
+  deleteStacks(setting?: boolean, passToChildren?: boolean): void;
 };
 
 type ThrowDescriptor = {
@@ -182,16 +182,16 @@ class StdioManipulator {
 }
 
 // mutable global data
-const _STDIO_MANIP_ = new StdioManipulator();
-const _TEST_PROMISES_: WeakSet<Promise<any>> = new WeakSet();
-let _N_TESTS_PASSED_ = 0;
-let _N_TESTS_FAILED_ = 0;
+const STDIO_MANIP = new StdioManipulator();
+const TEST_PROMISES: WeakSet<Promise<any>> = new WeakSet();
+let N_TESTS_PASSED = 0;
+let N_TESTS_FAILED = 0;
 
-async function findTestPaths(
-  matcher: string = "\\.test\\.js"
+async function findPaths(
+  testMatcher: string = "\\.test\\.js$"
 ): Promise<string[]> {
-  const result: string[] = await (async () => {
-    const _: string[] = [];
+  const result: Set<string> = await (async () => {
+    const _ = new Set<string>();
     // collect any manually specified files first
     for (let i = 2; i < process.argv.length; ++i) {
       const cur = process.argv[i];
@@ -202,7 +202,7 @@ async function findTestPaths(
         })
       );
       if (stats.isFile()) {
-        _.push(path.resolve(cur));
+        _.add(path.resolve(cur));
         process.argv.splice(i, 1);
         --i;
       }
@@ -220,7 +220,9 @@ async function findTestPaths(
     );
     if (stats.isFile()) {
       const name = path.basename(cur);
-      if (name.match(new RegExp(matcher, "m"))) result.push(path.resolve(cur));
+      if (name.match(new RegExp(testMatcher, "m"))) {
+        result.add(path.resolve(cur));
+      }
     } else if (stats.isDirectory()) {
       const subs: string[] = await new Promise((resolve, reject) =>
         fs.readdir(cur, (err, files) => {
@@ -243,187 +245,183 @@ async function findTestPaths(
     );
   }
 
-  if (result.length === 0)
+  if (result.size === 0)
     throw new TesttsArgumentError(
       "cannot find tests",
       ...process.argv.slice(2)
     );
 
-  return result;
+  return Array.from(result);
 }
 
-interface Test<T> {
-  readonly onceReady: Promise<void>;
-  readonly passed: boolean;
-  getResult: () => T | Promise<T>;
-  log: () => Promise<void>;
-}
 class Test<T> {
-  constructor(
-    description: string,
-    body: TestBody<T>,
-    dataListener: (data?: T) => void,
-    errListener: (err?: any) => void,
-    expectedThrow?: ThrowDescriptor,
-    deleteStacks?: boolean
-  ) {
-    let _error: any | null = null;
-    let _passed: boolean = false;
+  public get passed() {
+    return this.#passed;
+  }
+  public get onceReady() {
+    return this.#onceReady;
+  }
 
-    const _children: Test<any>[] = [];
-
-    this.log = async () => {
-      let anyChildrenFailed = false;
-      if (_children.length) {
-        console.log(TEST + " " + description);
+  public async log(): Promise<void> {
+    let anyChildrenFailed = false;
+    if (this.#children.length) {
+      console.log(TEST + " " + this.#description);
+    } else {
+      if (this.#passed) {
+        console.log(PASS + " " + this.#description);
       } else {
-        if (_passed) {
-          console.log(PASS + " " + description);
-        } else {
-          console.error(FAIL + " " + description);
+        console.error(FAIL + " " + this.#description);
 
-          _STDIO_MANIP_.indent += 2;
-          if (_error) {
-            if (deleteStacks && _error instanceof Error) delete _error.stack;
-            console.error(_error);
-          }
-          if (expectedThrow) {
-            if (
-              expectedThrow.message ||
-              expectedThrow.constructedBy ||
-              expectedThrow.predicate
-            ) {
-              console.error("[expected throw]:");
-              console.error(expectedThrow);
-            } else {
-              console.error("[expected throw]");
-            }
-          }
-          _STDIO_MANIP_.indent -= 2;
+        STDIO_MANIP.indent += 2;
+        if (this.#error) {
+          if (this.#deleteStacks && this.#error instanceof Error)
+            delete this.#error.stack;
+          console.error(this.#error);
         }
-      }
-      let nChildrenBefore = _children.length;
-      for (const child of _children) {
-        _STDIO_MANIP_.indent += 2;
-        await child.onceReady;
-        await child.log();
-        anyChildrenFailed = anyChildrenFailed || !child.passed;
-        _STDIO_MANIP_.indent -= 2;
-      }
-      if (_children.length > nChildrenBefore)
-        throw new TesttsTypeError(
-          "found a subchild attached to a non-immediate parent... " +
-            "check for missing `test` parameters"
-        );
-      if (anyChildrenFailed && _passed) {
-        // if any children failed but this test body did not, report failure
-        --_N_TESTS_PASSED_;
-        ++_N_TESTS_FAILED_;
-        _passed = false;
-        console.error(FAIL);
-      } else if (_children.length && !_passed) {
-        // else if there was child output for a failed parent, report failure
-        process.stdout.write(FAIL + " ");
-        _STDIO_MANIP_.indent += 2;
-        if (_error) {
-          _STDIO_MANIP_.indentNewlinesOnly = true;
-          console.error(_error);
-          _STDIO_MANIP_.indentNewlinesOnly = false;
-        }
-        if (expectedThrow) {
+        if (this.#throws) {
           if (
-            expectedThrow.message ||
-            expectedThrow.constructedBy ||
-            expectedThrow.predicate
+            this.#throws.message ||
+            this.#throws.constructedBy ||
+            this.#throws.predicate
           ) {
             console.error("[expected throw]:");
-            console.error(expectedThrow);
+            console.error(this.#throws);
           } else {
             console.error("[expected throw]");
           }
         }
-        _STDIO_MANIP_.indent -= 2;
+        STDIO_MANIP.indent -= 2;
       }
-    };
+    }
+    let nChildrenBefore = this.#children.length;
+    for (const child of this.#children) {
+      STDIO_MANIP.indent += 2;
+      await child.onceReady;
+      await child.log();
+      anyChildrenFailed = anyChildrenFailed || !child.passed;
+      STDIO_MANIP.indent -= 2;
+    }
+    if (this.#children.length > nChildrenBefore)
+      throw new TesttsTypeError(
+        "found a subchild attached to a non-immediate parent... " +
+          "check for missing `test` parameters"
+      );
+    if (anyChildrenFailed && this.#passed) {
+      // if any children failed but this test body did not, report failure
+      --N_TESTS_PASSED;
+      ++N_TESTS_FAILED;
+      this.#passed = false;
+      console.error(FAIL);
+    } else if (this.#children.length && !this.#passed) {
+      // else if there was child output for a failed parent, report failure
+      process.stdout.write(FAIL + " ");
+      STDIO_MANIP.indent += 2;
+      if (this.#error) {
+        STDIO_MANIP.indentNewlinesOnly = true;
+        console.error(this.#error);
+        STDIO_MANIP.indentNewlinesOnly = false;
+      }
+      if (this.#throws) {
+        if (
+          this.#throws.message ||
+          this.#throws.constructedBy ||
+          this.#throws.predicate
+        ) {
+          console.error("[expected throw]:");
+          console.error(this.#throws);
+        } else {
+          console.error("[expected throw]");
+        }
+      }
+      STDIO_MANIP.indent -= 2;
+    }
+  }
 
-    const _onceReady = new Promise<void>(async (resolve) => {
+  constructor(
+    description: string,
+    body: TestBody<T>,
+    ondata: (data?: T) => void,
+    onerr: (err?: any) => void,
+    throws?: ThrowDescriptor,
+    deleteStacks?: boolean
+  ) {
+    this.#description = description;
+    this.#throws = throws;
+    this.#deleteStacks = deleteStacks;
+    this.#onceReady = new Promise<void>(async (resolve) => {
       try {
         const result = await body(
-          makeAPI((v) => _children.push(v), deleteStacks)
+          makeAPI((child) => this.#children.push(child), deleteStacks)
         );
-        if (!expectedThrow) {
-          ++_N_TESTS_PASSED_;
-          _passed = true;
-          dataListener(result);
+        if (!throws) {
+          ++N_TESTS_PASSED;
+          this.#passed = true;
+          ondata(result);
           resolve();
         } else {
-          ++_N_TESTS_FAILED_;
-          _passed = false;
-          errListener();
+          ++N_TESTS_FAILED;
+          this.#passed = false;
+          onerr();
           resolve();
         }
       } catch (e) {
-        _error = e;
-        if (expectedThrow) {
-          if (
-            expectedThrow.message ||
-            expectedThrow.constructedBy ||
-            expectedThrow.predicate
-          ) {
+        this.#error = e;
+        if (throws) {
+          if (throws.message || throws.constructedBy || throws.predicate) {
             // throw was described; check the descriptor
-            if (expectedThrow.predicate) {
-              _passed = !!expectedThrow.predicate(e);
-            } else if (expectedThrow.constructedBy && expectedThrow.message) {
-              _passed =
-                e instanceof expectedThrow.constructedBy &&
-                e.message === expectedThrow.message;
-            } else if (expectedThrow.constructedBy) {
-              _passed = e instanceof expectedThrow.constructedBy;
-            } else if (expectedThrow.message) {
-              _passed = e.message === expectedThrow.message;
+            if (throws.predicate) {
+              this.#passed = !!throws.predicate(e);
+            } else if (throws.constructedBy && throws.message) {
+              this.#passed =
+                e instanceof throws.constructedBy &&
+                e.message === throws.message;
+            } else if (throws.constructedBy) {
+              this.#passed = e instanceof throws.constructedBy;
+            } else if (throws.message) {
+              this.#passed = e.message === throws.message;
             } else {
-              _passed = false;
+              this.#passed = false;
             }
           } else {
-            _passed = true;
+            this.#passed = true;
           }
         } else {
-          _passed = false;
+          this.#passed = false;
         }
-        if (_passed) {
-          ++_N_TESTS_PASSED_;
-          dataListener();
+        if (this.#passed) {
+          ++N_TESTS_PASSED;
+          ondata();
           resolve();
         } else {
-          ++_N_TESTS_FAILED_;
-          errListener(e);
+          ++N_TESTS_FAILED;
+          onerr(e);
           resolve();
         }
       }
     });
-
-    Object.defineProperty(this, "onceReady", {
-      get: () => _onceReady,
-      enumerable: true,
-      configurable: false,
-    });
-
-    Object.defineProperty(this, "passed", {
-      get: () => _passed,
-      enumerable: true,
-      configurable: false,
-    });
   }
+
+  #description: string;
+  #deleteStacks?: boolean;
+  #passed = false;
+  #error: any | null = null;
+  #throws?: ThrowDescriptor;
+  #children: Test<any>[] = [];
+
+  #onceReady: Promise<void>;
 }
 
 function makeAPI(
   registerChild: <T>(child: Test<T>) => void,
   deleteStacks?: boolean
-): API {
-  function throws(constructor: ErrorSubConstructor, message?: string): API;
-  function throws(message: string): API;
-  function throws(isCorrectThrow: Predicate<[ErrorSub | any]>): API;
-  function throws(): API;
+): TestRegistrar {
+  function throws(
+    constructor: ErrorSubConstructor,
+    message?: string
+  ): TestRegistrar;
+  function throws(message: string): TestRegistrar;
+  function throws(isCorrectThrow: Predicate<[ErrorSub | any]>): TestRegistrar;
+  function throws(): TestRegistrar;
   function throws<T>(description: string, body: TestBody<T>): Promise<T>;
   function throws<T>(
     throwOrTestDescr?:
@@ -453,7 +451,10 @@ function makeAPI(
       }
     } else if (typeof throwOrTestDescr === "function") {
       // if arg0 is a function, it is either a throw predicate or constructor
-      if (throwOrTestDescr === Error || throwOrTestDescr.prototype instanceof Error) {
+      if (
+        throwOrTestDescr === Error ||
+        throwOrTestDescr.prototype instanceof Error
+      ) {
         if (typeof messageOrBody === "string") {
           // arg0 is an error constructor; arg1 an error message
           return genTestFn({
@@ -498,6 +499,7 @@ function makeAPI(
     }
   }
   function genTestFn(expectedThrow?: ThrowDescriptor) {
+    let passDeleteStacks = true;
     const test = <T>(description: string, body: TestBody<T>): Promise<T> => {
       if (typeof body !== "function")
         throw new TesttsArgumentError(
@@ -510,16 +512,17 @@ function makeAPI(
           resolve as (data?: T) => void,
           reject,
           expectedThrow,
-          deleteStacks
+          passDeleteStacks ? deleteStacks : false
         );
         registerChild(t);
       });
-      _TEST_PROMISES_.add(execution);
+      TEST_PROMISES.add(execution);
       return execution;
     };
     test.throws = throws;
-    test.deleteStacks = (setting = true) => {
+    test.deleteStacks = (setting = true, passToChildren = true) => {
       deleteStacks = setting;
+      passDeleteStacks = passToChildren;
     };
     return test;
   }
@@ -530,8 +533,8 @@ async function globalTestLauncher() {
   // catch any unhandled rejections thrown by tests
   process.addListener("unhandledRejection", (details, promise) => {
     // only log unhandled rejections if they don't directly belong to a test
-    if (!_TEST_PROMISES_.has(promise)) {
-      _STDIO_MANIP_.reset();
+    if (!TEST_PROMISES.has(promise)) {
+      STDIO_MANIP.reset();
       console.error(
         "[testts] Error: Unhandled promise rejection. Exiting. See below:"
       );
@@ -541,7 +544,7 @@ async function globalTestLauncher() {
   });
 
   // shift all test output by 1
-  _STDIO_MANIP_.indent = 1;
+  STDIO_MANIP.indent = 1;
 
   // check for options
   let matcher: string | undefined = undefined;
@@ -555,16 +558,49 @@ async function globalTestLauncher() {
     }
   }
 
-  const paths = await findTestPaths(matcher);
-  const fileTests: Test<void>[] = [];
+  const paths = await findPaths(matcher);
+
+  const settings: Settings = (() => {
+    try {
+      const o = require(path.join(process.cwd(), "./.testts.json"));
+      o.prioritized = (<Settings>o).prioritized
+        .map((p) => path.resolve(p))
+        .filter((p) => paths.includes(p));
+      return o;
+    } catch (e) {
+      return { prioritized: [] };
+    }
+  })();
+
+  // handle all prioritized file tests separately, and individually
+  for (const p of settings.prioritized) {
+    const t = new Test(
+      ANSI_CYAN_FG + path.relative(process.cwd(), p) + ANSI_RESET,
+      (test) => {
+        module.exports = {
+          test,
+        };
+        require(p);
+      },
+      () => {},
+      () => {}
+    );
+    await t.onceReady;
+    await t.log();
+  }
+
+  // collect all non-prioritized file tests, triggering file execution.
+  // if asynchronous, initiates all top-level async operations before awaiting
+  const nonPrioritized: Test<void>[] = [];
+
   for (const p of paths) {
-    fileTests.push(
+    if (settings.prioritized.includes(p)) continue;
+    nonPrioritized.push(
       new Test(
         ANSI_CYAN_FG + path.relative(process.cwd(), p) + ANSI_RESET,
         (test) => {
           module.exports = {
             test,
-            assert,
           };
           require(p);
         },
@@ -573,24 +609,25 @@ async function globalTestLauncher() {
       )
     );
   }
-  for (const ft of fileTests) {
-    await ft.onceReady;
-    await ft.log();
+  // await and log all of the tests
+  for (const t of nonPrioritized) {
+    await t.onceReady;
+    await t.log();
   }
 }
 
 if (process.argv.length >= 3) {
   globalTestLauncher()
     .then(() => {
-      _STDIO_MANIP_.reset();
-      if (_N_TESTS_FAILED_) {
+      STDIO_MANIP.reset();
+      if (N_TESTS_FAILED) {
         console.error(
           "\n" +
             ANSI_RED_FG +
             "passed [" +
-            _N_TESTS_PASSED_ +
+            N_TESTS_PASSED +
             "/" +
-            (_N_TESTS_PASSED_ + _N_TESTS_FAILED_) +
+            (N_TESTS_PASSED + N_TESTS_FAILED) +
             "] tests" +
             ANSI_RESET
         );
@@ -600,9 +637,9 @@ if (process.argv.length >= 3) {
           "\n" +
             ANSI_GREEN_FG +
             "passed [" +
-            _N_TESTS_PASSED_ +
+            N_TESTS_PASSED +
             "/" +
-            (_N_TESTS_PASSED_ + _N_TESTS_FAILED_) +
+            (N_TESTS_PASSED + N_TESTS_FAILED) +
             "] tests" +
             ANSI_RESET
         );
@@ -610,7 +647,7 @@ if (process.argv.length >= 3) {
       }
     })
     .catch((e) => {
-      _STDIO_MANIP_.reset();
+      STDIO_MANIP.reset();
       console.error(e);
       process.exit(1);
     });

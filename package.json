@@ -1,6 +1,6 @@
 {
   "name": "@jpcx/testts",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "an asynchronous, nesting, composable testing framework for TypeScript [zero-dependency]",
   "license": "LGPL-3.0-or-later",
   "repository": "git://github.com/jpcx/testts.git",
@@ -29,14 +29,14 @@
     "clean": "rm -f testts.js testts.d.ts",
     "clean-test": "rm -rf test/dist",
     "clean-all": "npm run-script clean && npm run-script clean-test",
-    "test": "./test/node_modules/.bin/@jpcx/testts test/dist",
+    "test": "./test/node_modules/.bin/@jpcx/testts test/dist test/dist/testts.test.js",
     "prepare": "npm run-script clean-all && npm run-script build-all && npm test"
   },
   "bin": "./testts.js",
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^15.0.0",
-    "typescript": "^4.0.0"
+    "@types/node": "^15.12.4",
+    "typescript": "^4.3.4"
   },
   "engines": {
     "node": ">=10.0.0"
